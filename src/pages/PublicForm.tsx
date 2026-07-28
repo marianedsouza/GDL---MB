@@ -17,6 +17,7 @@ export default function PublicForm() {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
+  const [cpf, setCpf] = useState('');
   const [neighborhood, setNeighborhood] = useState('');
   const [administrativeRegions, setAdministrativeRegions] = useState<string[]>([]);
   const [city, setCity] = useState('');
@@ -103,8 +104,8 @@ export default function PublicForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !phone) {
-      setError('Preencha os campos obrigatórios: Nome e Telefone.');
+    if (!name || !phone || !cpf) {
+      setError('Preencha os campos obrigatórios: Nome, Telefone e CPF.');
       return;
     }
 
@@ -115,14 +116,15 @@ export default function PublicForm() {
       const res = await fetch('/api/public/leads', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          leaderId,
-          registeredBy: leaderName,
-          name,
-          phone,
-          email,
-          street,
-          number,
+          body: JSON.stringify({
+            leaderId,
+            registeredBy: leaderName,
+            name,
+            phone,
+            email,
+            cpf,
+            street,
+            number,
           neighborhood,
           administrativeRegions,
           city,
@@ -137,6 +139,9 @@ export default function PublicForm() {
 
       if (res.ok) {
         setSuccess(true);
+      } else if (res.status === 409) {
+        const data = await res.json();
+        setError(data.message || 'Este contato já foi cadastrado por outra liderança.');
       } else {
         const data = await res.json();
         if (data.details && data.details.includes('Could not find the')) {
@@ -240,6 +245,12 @@ export default function PublicForm() {
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">E-mail <span className="text-slate-400 text-xs">(opcional)</span></label>
                 <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none" placeholder="email@exemplo.com" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  CPF <span className="text-red-500">*</span>
+                </label>
+                <input required type="text" value={cpf} onChange={(e) => setCpf(e.target.value.replace(/\D/g, '').slice(0, 11))} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none" placeholder="000.000.000-00" />
               </div>
             </div>
           </section>

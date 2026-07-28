@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { Plus, Trash2, Link as LinkIcon, Users, ExternalLink, Download, Share2 } from 'lucide-react';
+import { Plus, Trash2, Link as LinkIcon, Users, ExternalLink, Download, Share2, Copy, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import AdminLayout from '../components/AdminLayout';
 
@@ -25,6 +25,7 @@ export default function Dashboard() {
   const [newAddressNumber, setNewAddressNumber] = useState('');
   const [newCepError, setNewCepError] = useState('');
   const [loadingCep, setLoadingCep] = useState(false);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const fetchLeaders = async () => {
     try {
@@ -218,14 +219,24 @@ export default function Dashboard() {
     });
   };
 
-  const shareQR = async (leaderId: string, leaderName: string) => {
+  const copyLink = async (leaderId: string) => {
+    try {
+      await navigator.clipboard.writeText(getFormUrl(leaderId));
+      setCopiedId(leaderId);
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch {
+      prompt('Copie o link manualmente:', getFormUrl(leaderId));
+    }
+  };
+
+  const shareWhatsApp = async (leaderId: string, leaderName: string) => {
     const formUrl = getFormUrl(leaderId);
     const message = `*Formulário de Cadastro - ${leaderName}*\n\nAcesse o link abaixo para se cadastrar:\n${formUrl}`;
 
     const qrBlob = await generateQRImage(leaderId);
-    const qrFile = qrBlob ? new File([qrBlob], `qrcode-${leaderName}.png`, { type: 'image/png' }) : null;
 
-    if (navigator.share && qrFile) {
+    if (navigator.share && qrBlob) {
+      const qrFile = new File([qrBlob], `qrcode-${leaderName}.png`, { type: 'image/png' });
       try {
         await navigator.share({ files: [qrFile], text: message });
         return;
@@ -313,9 +324,9 @@ export default function Dashboard() {
                       <Download className="w-4 h-4" />
                     </button>
                     <button
-                      onClick={() => shareQR(leader._id, leader.name)}
-                      className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
-                      title="Compartilhar"
+                      onClick={() => shareWhatsApp(leader._id, leader.name)}
+                      className="p-1.5 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                      title="Compartilhar no WhatsApp"
                     >
                       <Share2 className="w-4 h-4" />
                     </button>
@@ -332,6 +343,17 @@ export default function Dashboard() {
                       value={getFormUrl(leader._id)}
                       className="text-xs w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded text-slate-500 truncate outline-none"
                     />
+                    <button
+                      onClick={() => copyLink(leader._id)}
+                      className={`p-1.5 border rounded transition-colors ${
+                        copiedId === leader._id
+                          ? 'text-green-600 bg-green-50 border-green-200'
+                          : 'text-slate-400 hover:text-slate-600 bg-slate-50 border-slate-200'
+                      }`}
+                      title="Copiar Link"
+                    >
+                      {copiedId === leader._id ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                    </button>
                     <a 
                       href={getFormUrl(leader._id)} 
                       target="_blank" 

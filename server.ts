@@ -240,7 +240,7 @@ app.get('/api/public/leaders/:id', async (req, res) => {
 // Public: Submit lead form
 app.post('/api/public/leads', async (req, res) => {
   try {
-    const { leaderId, name, phone, email, cpf, address } = req.body;
+    const { leaderId, registeredBy, name, phone, email, cpf, street, number, neighborhood, administrativeRegions, city, contactOrigins, segments, relationshipLevels, influencePotentials, nextActions, observations } = req.body;
     
     const { data: leader, error: leaderError } = await supabase
       .from('leaders')
@@ -250,9 +250,44 @@ app.post('/api/public/leads', async (req, res) => {
 
     if (leaderError || !leader) return res.status(404).json({ error: "Líder inválido" });
 
+    // Check for duplicate lead by CPF
+    const { data: existingLead } = await supabase
+      .from('leads')
+      .select('leader_id')
+      .eq('cpf', cpf)
+      .maybeSingle();
+
+    if (existingLead) {
+      const { data: originalLeader } = await supabase
+        .from('leaders')
+        .select('name')
+        .eq('id', existingLead.leader_id)
+        .single();
+
+      return res.status(409).json({
+        error: "lead_exists",
+        message: `Este contato já foi cadastrado pela liderança ${originalLeader?.name || 'desconhecida'}`
+      });
+    }
+
     const { error } = await supabase
       .from('leads')
-      .insert([{ leader_id: leaderId, name, phone, email, cpf, address }]);
+      .insert([{
+        leader_id: leaderId,
+        registered_by: registeredBy,
+        name, phone, email, cpf,
+        street,
+        address_number: number,
+        neighborhood,
+        administrative_region: administrativeRegions,
+        city,
+        contact_origin: contactOrigins,
+        segment: segments,
+        relationship_level: relationshipLevels,
+        influence_potential: influencePotentials,
+        next_action: nextActions,
+        observations,
+      }]);
 
     if (error) throw error;
     
