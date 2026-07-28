@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { User, Phone, CheckCircle2, AlertCircle, Mail, MapPin, MessageSquare, Users, Target, Star, ArrowRight, FileText, UserCheck } from 'lucide-react';
+import { User, Phone, CheckCircle2, AlertCircle, Mail, MapPin, MessageSquare, Users, Target, Star, ArrowRight, FileText } from 'lucide-react';
 
-const RESPONSAVEIS = ['Silvia Renata', 'Júlio', 'Gledson', 'Ellen', 'Ariadne', 'Patrícia', 'Hugo', 'Beatriz', 'Cira', 'Dudi', 'Outro'];
 const REGIOES = ['Anhanduizinho', 'Bandeira', 'Centro', 'Imbirussu', 'Lagoa', 'Prosa', 'Segredo', 'Distritos', 'Outro'];
 const ORIGENS = ['Reunião', 'Visita domiciliar', 'Evento', 'Igreja', 'Escola', 'Universidade', 'Comércio', 'Indicação', 'Redes sociais', 'Outro'];
 const SEGMENTOS = ['Mulheres', 'Juventude', 'Empresários', 'Comércio', 'Educação', 'Saúde', 'Evangélico', 'Católico', 'Universitário', 'Servidor Público', 'Agronegócio', 'Comunidade', 'Outro'];
@@ -15,8 +14,6 @@ export default function PublicForm() {
   const [leaderName, setLeaderName] = useState('');
   const [loading, setLoading] = useState(true);
 
-  const [registeredBy, setRegisteredBy] = useState('');
-  const [registeredByOther, setRegisteredByOther] = useState('');
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
@@ -58,8 +55,8 @@ export default function PublicForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!registeredBy || !name || !phone) {
-      setError('Preencha os campos obrigatórios: Responsável, Nome e Telefone.');
+    if (!name || !phone) {
+      setError('Preencha os campos obrigatórios: Nome e Telefone.');
       return;
     }
 
@@ -72,7 +69,7 @@ export default function PublicForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           leaderId,
-          registeredBy: registeredBy === 'Outro' ? registeredByOther : registeredBy,
+          registeredBy: leaderName,
           name,
           phone,
           email,
@@ -164,44 +161,10 @@ export default function PublicForm() {
             </div>
           )}
 
-          {/* BLOCO 1 – Responsável */}
-          <section>
-            <h2 className="text-xl font-semibold text-slate-800 mb-4 pb-2 border-b border-slate-200 flex items-center gap-2">
-              <UserCheck className="h-5 w-5 text-indigo-600" /> BLOCO 1 – RESPONSÁVEL PELO CADASTRO
-            </h2>
-            <p className="text-sm text-slate-500 mb-4">Esse campo permitirá gerar relatórios por liderança e acompanhar a produtividade de cada equipe.</p>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                Quem realizou este cadastro? <span className="text-red-500">*</span>
-              </label>
-              <select
-                required
-                value={registeredBy}
-                onChange={(e) => setRegisteredBy(e.target.value)}
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none"
-              >
-                <option value="">Selecione...</option>
-                {RESPONSAVEIS.map((r) => (
-                  <option key={r} value={r}>{r}</option>
-                ))}
-              </select>
-              {registeredBy === 'Outro' && (
-                <input
-                  type="text"
-                  required
-                  value={registeredByOther}
-                  onChange={(e) => setRegisteredByOther(e.target.value)}
-                  placeholder="Especifique..."
-                  className="mt-2 w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none"
-                />
-              )}
-            </div>
-          </section>
-
           {/* BLOCO 2 – Dados do Contato */}
           <section>
             <h2 className="text-xl font-semibold text-slate-800 mb-4 pb-2 border-b border-slate-200 flex items-center gap-2">
-              <User className="h-5 w-5 text-indigo-600" /> BLOCO 2 – DADOS DO CONTATO
+              <User className="h-5 w-5 text-indigo-600" /> BLOCO 1 – DADOS DO CONTATO
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="md:col-span-2">
@@ -226,7 +189,7 @@ export default function PublicForm() {
           {/* BLOCO 3 – Localização */}
           <section>
             <h2 className="text-xl font-semibold text-slate-800 mb-4 pb-2 border-b border-slate-200 flex items-center gap-2">
-              <MapPin className="h-5 w-5 text-indigo-600" /> BLOCO 3 – LOCALIZAÇÃO
+              <MapPin className="h-5 w-5 text-indigo-600" /> BLOCO 2 – LOCALIZAÇÃO
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
@@ -252,7 +215,7 @@ export default function PublicForm() {
           {/* BLOCO 4 – Origem do Contato */}
           <section>
             <h2 className="text-xl font-semibold text-slate-800 mb-4 pb-2 border-b border-slate-200 flex items-center gap-2">
-              <Target className="h-5 w-5 text-indigo-600" /> BLOCO 4 – ORIGEM DO CONTATO
+              <Target className="h-5 w-5 text-indigo-600" /> BLOCO 3 – ORIGEM DO CONTATO
             </h2>
             <p className="text-sm text-slate-500 mb-3">Como esse contato foi realizado?</p>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -268,7 +231,7 @@ export default function PublicForm() {
           {/* BLOCO 5 – Segmento */}
           <section>
             <h2 className="text-xl font-semibold text-slate-800 mb-4 pb-2 border-b border-slate-200 flex items-center gap-2">
-              <Users className="h-5 w-5 text-indigo-600" /> BLOCO 5 – SEGMENTO
+              <Users className="h-5 w-5 text-indigo-600" /> BLOCO 4 – SEGMENTO
             </h2>
             <p className="text-sm text-slate-500 mb-3">Este contato pertence a qual segmento?</p>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -284,7 +247,7 @@ export default function PublicForm() {
           {/* BLOCO 6 – Nível de Relacionamento */}
           <section>
             <h2 className="text-xl font-semibold text-slate-800 mb-4 pb-2 border-b border-slate-200 flex items-center gap-2">
-              <Star className="h-5 w-5 text-indigo-600" /> BLOCO 6 – NÍVEL DE RELACIONAMENTO
+              <Star className="h-5 w-5 text-indigo-600" /> BLOCO 5 – NÍVEL DE RELACIONAMENTO
             </h2>
             <p className="text-sm text-slate-500 mb-3">Como você classificaria esse contato?</p>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -300,7 +263,7 @@ export default function PublicForm() {
           {/* BLOCO 7 – Potencial de Influência */}
           <section>
             <h2 className="text-xl font-semibold text-slate-800 mb-4 pb-2 border-b border-slate-200 flex items-center gap-2">
-              <Star className="h-5 w-5 text-indigo-600" /> <span>BLOCO 7 – POTENCIAL DE INFLUÊNCIA</span> <span className="text-yellow-500 text-lg">⭐</span>
+              <Star className="h-5 w-5 text-indigo-600" /> <span>BLOCO 6 – POTENCIAL DE INFLUÊNCIA</span> <span className="text-yellow-500 text-lg">⭐</span>
             </h2>
             <p className="text-sm text-slate-500 mb-3">Qual o potencial de influência dessa pessoa?</p>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -316,7 +279,7 @@ export default function PublicForm() {
           {/* BLOCO 8 – Próxima Ação */}
           <section>
             <h2 className="text-xl font-semibold text-slate-800 mb-4 pb-2 border-b border-slate-200 flex items-center gap-2">
-              <ArrowRight className="h-5 w-5 text-indigo-600" /> BLOCO 8 – PRÓXIMA AÇÃO
+              <ArrowRight className="h-5 w-5 text-indigo-600" /> BLOCO 7 – PRÓXIMA AÇÃO
             </h2>
             <p className="text-sm text-slate-500 mb-3">Qual será o próximo passo com esse contato?</p>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -332,7 +295,7 @@ export default function PublicForm() {
           {/* BLOCO 9 – Observações */}
           <section>
             <h2 className="text-xl font-semibold text-slate-800 mb-4 pb-2 border-b border-slate-200 flex items-center gap-2">
-              <FileText className="h-5 w-5 text-indigo-600" /> BLOCO 9 – OBSERVAÇÕES
+              <FileText className="h-5 w-5 text-indigo-600" /> BLOCO 8 – OBSERVAÇÕES
             </h2>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1.5">Observações importantes</label>
