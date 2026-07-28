@@ -18,7 +18,7 @@ export default function PublicForm() {
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [neighborhood, setNeighborhood] = useState('');
-  const [administrativeRegion, setAdministrativeRegion] = useState('');
+  const [administrativeRegions, setAdministrativeRegions] = useState<string[]>([]);
   const [city, setCity] = useState('');
   const [cep, setCep] = useState('');
   const [street, setStreet] = useState('');
@@ -67,7 +67,7 @@ export default function PublicForm() {
       setStreet('');
       setNeighborhood('');
       setCity('');
-      setAdministrativeRegion('');
+      setAdministrativeRegions([]);
       try {
         const res = await fetch(`https://viacep.com.br/ws/${val}/json/`);
         const data = await res.json();
@@ -121,7 +121,7 @@ export default function PublicForm() {
           email,
           street,
           neighborhood,
-          administrativeRegion,
+          administrativeRegions,
           city,
           contactOrigins,
           segments,
@@ -269,14 +269,21 @@ export default function PublicForm() {
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">Bairro</label>
                 <input type="text" value={neighborhood} onChange={(e) => setNeighborhood(e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none" placeholder="Bairro" />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Região Administrativa</label>
-                <select value={administrativeRegion} onChange={(e) => setAdministrativeRegion(e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none">
-                  <option value="">Selecione...</option>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-slate-700 mb-2">Região Administrativa (pode selecionar mais de uma)</label>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                   {(city ? getRegioesPorCidade(city) : REGIOES).map((r) => (
-                    <option key={r} value={r}>{r}</option>
+                    <label key={r} className={`flex items-center gap-2 p-2.5 border rounded-lg cursor-pointer transition-colors ${administrativeRegions.includes(r) ? 'border-indigo-400 bg-indigo-50' : 'border-slate-200 hover:bg-slate-50'}`}>
+                      <input
+                        type="checkbox"
+                        checked={administrativeRegions.includes(r)}
+                        onChange={() => setAdministrativeRegions(toggleArrayItem(administrativeRegions, r))}
+                        className="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-600"
+                      />
+                      <span className="text-sm font-medium text-slate-700">{r}</span>
+                    </label>
                   ))}
-                </select>
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">Cidade</label>

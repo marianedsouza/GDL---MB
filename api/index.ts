@@ -187,7 +187,7 @@ app.post('/api/public/leaders', async (req, res) => {
 // Public: submit lead form
 app.post('/api/public/leads', async (req, res) => {
   try {
-    const { leaderId, registeredBy, name, phone, email, street, neighborhood, administrativeRegion, city, contactOrigins, segments, relationshipLevels, influencePotentials, nextActions, observations } = req.body;
+    const { leaderId, registeredBy, name, phone, email, street, neighborhood, administrativeRegions, city, contactOrigins, segments, relationshipLevels, influencePotentials, nextActions, observations } = req.body;
     const { data: leader, error: leaderError } = await supabase
       .from('leaders')
       .select('id')
@@ -204,7 +204,7 @@ app.post('/api/public/leads', async (req, res) => {
         email,
         street,
         neighborhood,
-        administrative_region: administrativeRegion,
+        administrative_region: administrativeRegions,
         city,
         contact_origin: contactOrigins,
         segment: segments,
