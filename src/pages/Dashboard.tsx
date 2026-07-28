@@ -190,21 +190,60 @@ export default function Dashboard() {
     img.src = url;
   };
 
+  const generateQRImage = async (leaderId: string): Promise<Blob | null> => {
+    const svgEl = document.getElementById(`qr-${leaderId}`);
+    if (!svgEl) return null;
+
+    const svgData = new XMLSerializer().serializeToString(svgEl);
+    const img = new Image();
+    const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(svgBlob);
+
+    return new Promise((resolve) => {
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width * 4;
+        canvas.height = img.height * 4;
+        const ctx = canvas.getContext('2d');
+        ctx!.scale(4, 4);
+        ctx!.drawImage(img, 0, 0);
+        URL.revokeObjectURL(url);
+        canvas.toBlob((blob) => resolve(blob), 'image/png');
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        resolve(null);
+      };
+      img.src = url;
+    });
+  };
+
   const shareQR = async (leaderId: string, leaderName: string) => {
     const formUrl = getFormUrl(leaderId);
+    const message = `*Formulário de Cadastro - ${leaderName}*\n\nAcesse o link abaixo para se cadastrar:\n${formUrl}`;
+
+    const qrBlob = await generateQRImage(leaderId);
+    const qrFile = qrBlob ? new File([qrBlob], `qrcode-${leaderName}.png`, { type: 'image/png' }) : null;
+
+    if (navigator.share && qrFile && navigator.canShare?.({ files: [qrFile] })) {
+      try {
+        await navigator.share({
+          files: [qrFile],
+          text: message,
+        });
+        return;
+      } catch {}
+    }
 
     if (navigator.share) {
       try {
-        await navigator.share({
-          title: `Formulário - ${leaderName}`,
-          text: `Cadastre-se na liderança de ${leaderName}:`,
-          url: formUrl,
-        });
+        await navigator.share({ text: message });
+        return;
       } catch {}
-    } else {
-      await navigator.clipboard.writeText(formUrl);
-      alert('Link copiado para a área de transferência!');
     }
+
+    const waUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    window.open(waUrl, '_blank');
   };
 
   return (
