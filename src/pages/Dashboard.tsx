@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { Plus, Trash2, Link as LinkIcon, Users, ExternalLink } from 'lucide-react';
+import { Plus, Trash2, Link as LinkIcon, Users, ExternalLink, Download, Share2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import AdminLayout from '../components/AdminLayout';
 
@@ -162,6 +162,51 @@ export default function Dashboard() {
     return `${window.location.origin}/form/${id}`;
   };
 
+  const downloadQR = async (leaderId: string, leaderName: string) => {
+    const svgEl = document.getElementById(`qr-${leaderId}`);
+    if (!svgEl) return;
+
+    const svgData = new XMLSerializer().serializeToString(svgEl);
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    const img = new Image();
+    const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(svgBlob);
+
+    img.onload = () => {
+      canvas.width = img.width * 4;
+      canvas.height = img.height * 4;
+      ctx!.scale(4, 4);
+      ctx!.drawImage(img, 0, 0);
+      URL.revokeObjectURL(url);
+
+      const a = document.createElement('a');
+      a.download = `qrcode-${leaderName.replace(/\s+/g, '-').toLowerCase()}.png`;
+      a.href = canvas.toDataURL('image/png');
+      a.click();
+    };
+    img.onerror = () => URL.revokeObjectURL(url);
+    img.src = url;
+  };
+
+  const shareQR = async (leaderId: string, leaderName: string) => {
+    const formUrl = getFormUrl(leaderId);
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `Formulário - ${leaderName}`,
+          text: `Cadastre-se na liderança de ${leaderName}:`,
+          url: formUrl,
+        });
+      } catch {}
+    } else {
+      await navigator.clipboard.writeText(formUrl);
+      alert('Link copiado para a área de transferência!');
+    }
+  };
+
   return (
     <AdminLayout>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
@@ -219,8 +264,26 @@ export default function Dashboard() {
               </div>
 
               <div className="flex items-center gap-6 mt-4 pt-4 border-t border-slate-100">
-                <div className="bg-white p-2 border border-slate-200 rounded-lg shrink-0">
-                  <QRCodeSVG value={getFormUrl(leader._id)} size={80} level="L" />
+                <div className="flex flex-col items-center gap-2">
+                  <div className="bg-white p-2 border border-slate-200 rounded-lg">
+                    <QRCodeSVG id={`qr-${leader._id}`} value={getFormUrl(leader._id)} size={80} level="L" />
+                  </div>
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => downloadQR(leader._id, leader.name)}
+                      className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                      title="Baixar QR Code"
+                    >
+                      <Download className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => shareQR(leader._id, leader.name)}
+                      className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                      title="Compartilhar"
+                    >
+                      <Share2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-slate-800 mb-1">
