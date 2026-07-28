@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { User, Phone, CheckCircle2, AlertCircle, Mail, MapPin, MessageSquare, Users, Target, Star, ArrowRight, FileText } from 'lucide-react';
+import { User, Phone, CheckCircle2, AlertCircle, Mail, MapPin, Users, Target, Star, ArrowRight, FileText, UserCheck } from 'lucide-react';
 
 const REGIOES = ['Anhanduizinho', 'Bandeira', 'Centro', 'Imbirussu', 'Lagoa', 'Prosa', 'Segredo', 'Distritos', 'Outro'];
 const ORIGENS = ['Reunião', 'Visita domiciliar', 'Evento', 'Igreja', 'Escola', 'Universidade', 'Comércio', 'Indicação', 'Redes sociais', 'Outro'];
@@ -161,7 +161,15 @@ export default function PublicForm() {
             </div>
           )}
 
-          {/* BLOCO 2 – Dados do Contato */}
+          <div className="flex items-center gap-3 p-4 bg-indigo-50 rounded-xl border border-indigo-100">
+            <UserCheck className="h-5 w-5 text-indigo-600 shrink-0" />
+            <div>
+              <span className="text-xs text-indigo-500 font-medium uppercase tracking-wider">Responsável pelo cadastro</span>
+              <p className="text-sm font-semibold text-indigo-800">{leaderName}</p>
+            </div>
+          </div>
+
+          {/* BLOCO 1 – Dados do Contato */}
           <section>
             <h2 className="text-xl font-semibold text-slate-800 mb-4 pb-2 border-b border-slate-200 flex items-center gap-2">
               <User className="h-5 w-5 text-indigo-600" /> BLOCO 1 – DADOS DO CONTATO
