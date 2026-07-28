@@ -225,12 +225,9 @@ export default function Dashboard() {
     const qrBlob = await generateQRImage(leaderId);
     const qrFile = qrBlob ? new File([qrBlob], `qrcode-${leaderName}.png`, { type: 'image/png' }) : null;
 
-    if (navigator.share && qrFile && navigator.canShare?.({ files: [qrFile] })) {
+    if (navigator.share && qrFile) {
       try {
-        await navigator.share({
-          files: [qrFile],
-          text: message,
-        });
+        await navigator.share({ files: [qrFile], text: message });
         return;
       } catch {}
     }
