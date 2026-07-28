@@ -22,6 +22,7 @@ export default function PublicForm() {
   const [city, setCity] = useState('');
   const [cep, setCep] = useState('');
   const [street, setStreet] = useState('');
+  const [number, setNumber] = useState('');
   const [cepError, setCepError] = useState('');
   const [loadingCep, setLoadingCep] = useState(false);
   const [contactOrigins, setContactOrigins] = useState<string[]>([]);
@@ -65,6 +66,7 @@ export default function PublicForm() {
       setLoadingCep(true);
       setCepError('');
       setStreet('');
+      setNumber('');
       setNeighborhood('');
       setCity('');
       setAdministrativeRegions([]);
@@ -120,6 +122,7 @@ export default function PublicForm() {
           phone,
           email,
           street,
+          number,
           neighborhood,
           administrativeRegions,
           city,
@@ -261,9 +264,13 @@ export default function PublicForm() {
                 {loadingCep && <p className="text-xs text-indigo-600 mt-1">Buscando CEP...</p>}
                 {cepError && <p className="text-xs text-red-600 mt-1">{cepError}</p>}
               </div>
-              <div className="md:col-span-2">
+              <div className="md:col-span-1">
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">Rua / Logradouro</label>
                 <input type="text" value={street} onChange={(e) => setStreet(e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none" placeholder="Rua" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Número</label>
+                <input type="text" value={number} onChange={(e) => setNumber(e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none" placeholder="S/N" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">Bairro</label>
