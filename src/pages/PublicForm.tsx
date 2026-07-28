@@ -20,6 +20,10 @@ export default function PublicForm() {
   const [neighborhood, setNeighborhood] = useState('');
   const [administrativeRegion, setAdministrativeRegion] = useState('');
   const [city, setCity] = useState('');
+  const [cep, setCep] = useState('');
+  const [street, setStreet] = useState('');
+  const [cepError, setCepError] = useState('');
+  const [loadingCep, setLoadingCep] = useState(false);
   const [contactOrigins, setContactOrigins] = useState<string[]>([]);
   const [segments, setSegments] = useState<string[]>([]);
   const [relationshipLevels, setRelationshipLevels] = useState<string[]>([]);
@@ -53,6 +57,48 @@ export default function PublicForm() {
   const toggleArrayItem = (arr: string[], item: string) =>
     arr.includes(item) ? arr.filter((i) => i !== item) : [...arr, item];
 
+  const handleCepChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value.replace(/\D/g, '');
+    setCep(val);
+
+    if (val.length === 8) {
+      setLoadingCep(true);
+      setCepError('');
+      setStreet('');
+      setNeighborhood('');
+      setCity('');
+      setAdministrativeRegion('');
+      try {
+        const res = await fetch(`https://viacep.com.br/ws/${val}/json/`);
+        const data = await res.json();
+
+        if (data.erro) {
+          setCepError('CEP não encontrado.');
+        } else if (data.uf !== 'MS') {
+          setCepError('Apenas endereços do Mato Grosso do Sul (MS) são aceitos.');
+        } else {
+          setStreet(data.logradouro || '');
+          setNeighborhood(data.bairro || '');
+          setCity(data.localidade || '');
+        }
+      } catch {
+        setCepError('Erro ao buscar o CEP.');
+      } finally {
+        setLoadingCep(false);
+      }
+    } else {
+      setCepError('');
+    }
+  };
+
+  const getRegioesPorCidade = (cidade: string): string[] => {
+    const c = cidade.toLowerCase().trim();
+    if (c === 'campo grande') {
+      return ['Anhanduizinho', 'Bandeira', 'Centro', 'Imbirussu', 'Lagoa', 'Prosa', 'Segredo', 'Outro'];
+    }
+    return ['Distritos', 'Outro'];
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !phone) {
@@ -73,6 +119,7 @@ export default function PublicForm() {
           name,
           phone,
           email,
+          street,
           neighborhood,
           administrativeRegion,
           city,
@@ -194,12 +241,30 @@ export default function PublicForm() {
             </div>
           </section>
 
-          {/* BLOCO 3 – Localização */}
+          {/* BLOCO 2 – LOCALIZAÇÃO */}
           <section>
             <h2 className="text-xl font-semibold text-slate-800 mb-4 pb-2 border-b border-slate-200 flex items-center gap-2">
               <MapPin className="h-5 w-5 text-indigo-600" /> BLOCO 2 – LOCALIZAÇÃO
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">CEP <span className="text-red-500">*</span></label>
+                <input
+                  type="text"
+                  required
+                  value={cep}
+                  onChange={handleCepChange}
+                  maxLength={8}
+                  placeholder="Somente números"
+                  className={`w-full px-4 py-3 bg-slate-50 border ${cepError ? 'border-red-300' : 'border-slate-200'} rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none`}
+                />
+                {loadingCep && <p className="text-xs text-indigo-600 mt-1">Buscando CEP...</p>}
+                {cepError && <p className="text-xs text-red-600 mt-1">{cepError}</p>}
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Rua / Logradouro</label>
+                <input type="text" value={street} onChange={(e) => setStreet(e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none" placeholder="Rua" />
+              </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">Bairro</label>
                 <input type="text" value={neighborhood} onChange={(e) => setNeighborhood(e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none" placeholder="Bairro" />
@@ -208,7 +273,7 @@ export default function PublicForm() {
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">Região Administrativa</label>
                 <select value={administrativeRegion} onChange={(e) => setAdministrativeRegion(e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none">
                   <option value="">Selecione...</option>
-                  {REGIOES.map((r) => (
+                  {(city ? getRegioesPorCidade(city) : REGIOES).map((r) => (
                     <option key={r} value={r}>{r}</option>
                   ))}
                 </select>
