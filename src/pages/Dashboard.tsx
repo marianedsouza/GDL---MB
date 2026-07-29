@@ -45,7 +45,8 @@ export default function Dashboard() {
         const data = await res.json();
         setLeaders(data);
       } else {
-        setFetchError('Erro ao carregar dados.');
+        const errData = await res.json().catch(() => ({}));
+        setFetchError('Erro ao carregar dados: ' + (errData.details || errData.error || res.status));
       }
     } catch (err) {
       setFetchError('Erro de conexão.');
