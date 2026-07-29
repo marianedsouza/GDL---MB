@@ -423,6 +423,9 @@ export default function ArchetypeForm({ leaderId, leaderName }: ArchetypeFormPro
     const result = calculateResults();
     setResults(result);
 
+    setSubmitted(true);
+    setSubmitting(false);
+
     try {
       const res = await fetch('/api/public/archetype', {
         method: 'POST',
@@ -443,12 +446,7 @@ export default function ArchetypeForm({ leaderId, leaderName }: ArchetypeFormPro
       }
     } catch (err: any) {
       setSubmitError(err.message || 'Erro ao salvar mapeamento. Verifique se o banco de dados foi configurado.');
-      setSubmitting(false);
-      return;
     }
-
-    setSubmitting(false);
-    setSubmitted(true);
   };
 
   if (submitted && results) {
@@ -481,6 +479,18 @@ export default function ArchetypeForm({ leaderId, leaderName }: ArchetypeFormPro
             </div>
 
             <div className="p-8 space-y-6">
+              {submitError && (
+                <div className="p-4 bg-amber-50 text-amber-800 rounded-xl text-sm border border-amber-200 flex items-start gap-2">
+                  <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5 text-amber-500" />
+                  <div>
+                    <p className="font-semibold">Resultado gerado localmente</p>
+                    <p className="text-amber-700 text-xs mt-1">{submitError}</p>
+                    <p className="text-amber-600 text-xs mt-1">
+                      Seus resultados estão visíveis abaixo. Para salvar no banco, execute as migrations no Supabase SQL Editor.
+                    </p>
+                  </div>
+                </div>
+              )}
               <div className="text-center">
                 <p className="text-slate-500">Resultado para</p>
                 <p className="text-xl font-bold text-slate-800">{leaderName}</p>
