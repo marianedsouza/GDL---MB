@@ -30,6 +30,9 @@ export default function LeadsList() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
   const [leaderName, setLeaderName] = useState<string>('');
+  const [searchInput, setSearchInput] = useState('');
+  const [filterLeaderInput, setFilterLeaderInput] = useState('');
+  const [filterSegmentInput, setFilterSegmentInput] = useState('');
   const [search, setSearch] = useState('');
   const [filterLeader, setFilterLeader] = useState('');
   const [filterSegment, setFilterSegment] = useState('');
@@ -99,10 +102,23 @@ export default function LeadsList() {
     });
   }, [leads, search, filterLeader, filterSegment]);
 
+  const applyFilters = () => {
+    setSearch(searchInput);
+    setFilterLeader(filterLeaderInput);
+    setFilterSegment(filterSegmentInput);
+  };
+
   const clearFilters = () => {
+    setSearchInput('');
+    setFilterLeaderInput('');
+    setFilterSegmentInput('');
     setSearch('');
     setFilterLeader('');
     setFilterSegment('');
+  };
+
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key === 'Enter') applyFilters();
   };
 
   const hasActiveFilters = search || filterLeader || filterSegment;
@@ -143,17 +159,18 @@ export default function LeadsList() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input
                 type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Buscar por nome, telefone, email, bairro..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Nome, telefone, email, bairro..."
                 className="w-full pl-9 pr-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none"
               />
             </div>
 
             {!leaderId && (
               <select
-                value={filterLeader}
-                onChange={(e) => setFilterLeader(e.target.value)}
+                value={filterLeaderInput}
+                onChange={(e) => setFilterLeaderInput(e.target.value)}
                 className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none"
               >
                 <option value="">Todas as lideranças</option>
@@ -164,8 +181,8 @@ export default function LeadsList() {
             )}
 
             <select
-              value={filterSegment}
-              onChange={(e) => setFilterSegment(e.target.value)}
+              value={filterSegmentInput}
+              onChange={(e) => setFilterSegmentInput(e.target.value)}
               className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none"
             >
               <option value="">Todos os segmentos</option>
@@ -173,6 +190,13 @@ export default function LeadsList() {
                 <option key={s} value={s}>{s}</option>
               ))}
             </select>
+
+            <button
+              onClick={applyFilters}
+              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors"
+            >
+              Filtrar
+            </button>
           </div>
         </div>
       )}
