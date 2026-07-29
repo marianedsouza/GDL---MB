@@ -247,13 +247,16 @@ app.post('/api/public/leads', async (req, res) => {
 // Public: save archetype mapping
 app.post('/api/public/archetype', async (req, res) => {
   try {
-    const { leaderId, leaderName, answers, results } = req.body;
+    const { leaderId, leaderName, answers, brandSingle, brandMulti, textAnswers, results } = req.body;
     const { error } = await supabase
       .from('archetype_responses')
       .insert([{
         leader_id: leaderId,
         leader_name: leaderName,
         answers,
+        brand_single: brandSingle,
+        brand_multi: brandMulti,
+        text_answers: textAnswers,
         dominant: results.dominant,
         secondary: results.secondary,
         shadow: results.shadow,
