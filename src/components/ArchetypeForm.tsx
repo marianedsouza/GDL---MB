@@ -473,8 +473,20 @@ export default function ArchetypeForm({ leaderId, leaderName }: ArchetypeFormPro
           <p className="text-sm text-slate-500 mb-1">
             Olá, <strong>{leaderName}</strong>!
           </p>
-          <p className="text-xs text-slate-400 mb-6">
+          <p className="text-xs text-slate-400 mb-4">
             Seu mapeamento arquetípico foi registrado com sucesso.
+          </p>
+          <div className="p-4 rounded-xl bg-gradient-to-br from-indigo-50 to-purple-50 border border-indigo-100 mb-4 text-left">
+            <p className="text-xs text-indigo-700 leading-relaxed">
+              Obrigado por compartilhar sua jornada conosco. Seu mapeamento será analisado com cuidado
+              pela nossa equipe para apoiar sua caminhada de liderança e autoconhecimento.
+            </p>
+            <p className="text-xs text-indigo-600 mt-2 italic">
+              "O autoconhecimento não é um destino — é uma jornada contínua de descoberta."
+            </p>
+          </div>
+          <p className="text-xs text-slate-500 mb-6">
+            Em breve sua liderança poderá acessar os resultados completos com o suporte da nossa equipe.
           </p>
           {submitError && (
             <div className="p-3 mb-4 bg-amber-50 text-amber-800 rounded-xl text-xs border border-amber-200 flex items-start gap-2">
@@ -482,7 +494,12 @@ export default function ArchetypeForm({ leaderId, leaderName }: ArchetypeFormPro
               {submitError}
             </div>
           )}
-          <p className="text-[10px] text-slate-400">
+          <button onClick={() => window.close()}
+            className="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-bold rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all shadow-md"
+          >
+            Sair
+          </button>
+          <p className="text-[10px] text-slate-400 mt-4">
             NeuroEssence360®️
           </p>
         </div>
