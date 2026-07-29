@@ -1,21 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { User, Phone, Mail, MapPin, Briefcase, CheckCircle2, Brain, AlertCircle, Loader2, ExternalLink, Copy, Check } from 'lucide-react';
+import { User, Phone, Mail, MapPin, Briefcase, CheckCircle2, Brain, AlertCircle, Loader2, ExternalLink, Copy, Check, UserCheck } from 'lucide-react';
+
+const REGIOES = ['Anhanduizinho', 'Bandeira', 'Centro', 'Imbirussu', 'Lagoa', 'Prosa', 'Segredo', 'Distritos', 'Outro'];
 import ArchetypeForm from '../components/ArchetypeForm';
 
 export default function CadastroLideranca() {
   const [formData, setFormData] = useState({
     fullName: '',
     name: '',
-    cpf: '',
     birthDate: '',
     phone: '',
     email: '',
+    cpf: '',
+    sexo: '',
     cep: '',
     street: '',
     addressNumber: '',
     neighborhood: '',
-    administrativeRegion: '',
+    administrativeRegions: [] as string[],
     city: '',
     role: '',
     directLeader: '',
@@ -54,28 +57,31 @@ export default function CadastroLideranca() {
 
   
   const handleCepChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value.replace(/D/g, '');
-    setFormData({ ...formData, cep: val });
-    
+    const val = e.target.value.replace(/\D/g, '');
+    setFormData(prev => ({ ...prev, cep: val }));
+
     if (val.length === 8) {
       setLoadingCep(true);
       setCepError('');
       try {
         const res = await fetch(`https://viacep.com.br/ws/${val}/json/`);
         const data = await res.json();
-        
+
         if (data.erro) {
           setCepError('CEP não encontrado.');
+        } else if (data.uf !== 'MS') {
+          setCepError('Apenas endereços do Mato Grosso do Sul (MS) são aceitos.');
         } else {
           setFormData(prev => ({
             ...prev,
             street: data.logradouro || '',
             neighborhood: data.bairro || '',
             city: data.localidade || '',
+            administrativeRegions: [],
             cep: val
           }));
         }
-      } catch (err) {
+      } catch {
         setCepError('Erro ao buscar o CEP.');
       } finally {
         setLoadingCep(false);
@@ -84,6 +90,17 @@ export default function CadastroLideranca() {
       setCepError('');
     }
   };
+
+  const getRegioesPorCidade = (cidade: string): string[] => {
+    const c = cidade.toLowerCase().trim();
+    if (c === 'campo grande') {
+      return ['Anhanduizinho', 'Bandeira', 'Centro', 'Imbirussu', 'Lagoa', 'Prosa', 'Segredo', 'Outro'];
+    }
+    return ['Distritos', 'Outro'];
+  };
+
+  const toggleArrayItem = (arr: string[], item: string) =>
+    arr.includes(item) ? arr.filter((i) => i !== item) : [...arr, item];
 
   useEffect(() => {
     if (urlLeaderId) {
@@ -115,20 +132,19 @@ export default function CadastroLideranca() {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value, type } = e.target as HTMLInputElement;
+    const { name: fieldName, value, type } = e.target as HTMLInputElement;
     if (type === 'checkbox') {
       const checked = (e.target as HTMLInputElement).checked;
-      if (name === 'commitmentAgreed') {
-        setFormData({ ...formData, [name]: checked });
+      if (fieldName === 'commitmentAgreed') {
+        setFormData({ ...formData, [fieldName]: checked });
       } else {
-        // Handle skills checkboxes
         const newSkills = checked 
           ? [...formData.skills, value] 
           : formData.skills.filter(s => s !== value);
         setFormData({ ...formData, skills: newSkills });
       }
     } else {
-      setFormData({ ...formData, [name]: value });
+      setFormData({ ...formData, [fieldName]: value });
     }
   };
 
@@ -168,7 +184,7 @@ export default function CadastroLideranca() {
 
   if (showArchetype) {
     const lid = completionState ? completionState.leaderId : submittedLeaderId;
-    const lname = completionState ? completionState.leaderName : formData.name;
+    const lname = completionState ? completionState.leaderName : formData.fullName;
     return <ArchetypeForm leaderId={lid} leaderName={lname} />;
   }
 
@@ -245,7 +261,7 @@ export default function CadastroLideranca() {
           </div>
           <h2 className="text-2xl font-semibold text-slate-800 mb-2">Cadastro Realizado!</h2>
           <p className="text-slate-600 mb-2">
-            Obrigado por se juntar à Equipe MB, <strong>{formData.name}</strong>.
+            Obrigado por se juntar à Equipe MB, <strong>{formData.fullName}</strong>.
           </p>
           <p className="text-slate-500 text-sm mb-6">
             Agora você pode fazer o Mapeamento Arquetípico para descobrir seu perfil.
@@ -315,70 +331,114 @@ export default function CadastroLideranca() {
             </div>
           )}
 
-          {/* BLOCO 1 - Dados Pessoais */}
+          {/* BLOCO 1 – DADOS PESSOAIS */}
           <section>
             <h2 className="text-xl font-semibold text-slate-800 mb-4 pb-2 border-b border-slate-200 flex items-center gap-2">
-              <User className="h-5 w-5 text-indigo-600" /> BLOCO 1 – Dados Pessoais
+              <User className="h-5 w-5 text-indigo-600" /> BLOCO 1 – DADOS PESSOAIS
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-slate-700 mb-1">Nome completo</label>
-                <input required type="text" name="fullName" value={formData.fullName} onChange={handleChange} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none" />
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  Nome completo <span className="text-red-500">*</span>
+                </label>
+                <input required type="text" name="fullName" value={formData.fullName} onChange={handleChange} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none" placeholder="Nome completo" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Nome como prefere ser chamado</label>
-                <input required type="text" name="name" value={formData.name} onChange={handleChange} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none" />
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  Como prefere ser chamado <span className="text-red-500">*</span>
+                </label>
+                <input required type="text" name="name" value={formData.name} onChange={handleChange} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none" placeholder="Apelido ou nome social" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">CPF</label>
-                <input required type="text" name="cpf" value={formData.cpf} onChange={handleChange} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none" />
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  Data de nascimento <span className="text-red-500">*</span>
+                </label>
+                <input required type="text" name="birthDate" value={formData.birthDate} onChange={(e) => {
+                  const val = e.target.value.replace(/\D/g, '').slice(0, 8);
+                  let formatted = val;
+                  if (val.length > 2) formatted = val.slice(0, 2) + '/' + val.slice(2);
+                  if (val.length > 4) formatted = formatted.slice(0, 5) + '/' + formatted.slice(5);
+                  setFormData(prev => ({ ...prev, birthDate: formatted }));
+                }} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none" placeholder="dd/mm/aaaa" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Data de nascimento</label>
-                <input required type="date" name="birthDate" value={formData.birthDate} onChange={handleChange} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none" />
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  Telefone / WhatsApp <span className="text-red-500">*</span>
+                </label>
+                <input required type="tel" name="phone" value={formData.phone} onChange={handleChange} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none" placeholder="(00) 00000-0000" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Telefone/WhatsApp</label>
-                <input required type="tel" name="phone" value={formData.phone} onChange={handleChange} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none" />
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">E-mail <span className="text-slate-400 text-xs">(opcional)</span></label>
+                <input type="email" name="email" value={formData.email} onChange={handleChange} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none" placeholder="email@exemplo.com" />
               </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-slate-700 mb-1">E-mail</label>
-                <input type="email" name="email" value={formData.email} onChange={handleChange} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none" />
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  CPF <span className="text-red-500">*</span>
+                </label>
+                <input required type="text" name="cpf" value={formData.cpf} onChange={(e) => setFormData({ ...formData, cpf: e.target.value.replace(/\D/g, '').slice(0, 11) })} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none" placeholder="000.000.000-00" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  Sexo <span className="text-red-500">*</span>
+                </label>
+                <select required name="sexo" value={formData.sexo} onChange={handleChange} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none">
+                  <option value="">Selecione...</option>
+                  <option value="Feminino">Feminino</option>
+                  <option value="Masculino">Masculino</option>
+                  <option value="Nao-binario">Não-binário</option>
+                  <option value="Travesti_Mulher_Trans">Travesti / Mulher Trans</option>
+                  <option value="Homem_Trans">Homem Trans</option>
+                  <option value="Genero_Fluido">Gênero Fluido</option>
+                  <option value="Outro">Outro</option>
+                  <option value="Prefiro_nao_informar">Prefiro não informar</option>
+                </select>
               </div>
             </div>
           </section>
 
-          {/* BLOCO 2 – Endereço */}
+          {/* BLOCO 2 – LOCALIZAÇÃO */}
           <section>
             <h2 className="text-xl font-semibold text-slate-800 mb-4 pb-2 border-b border-slate-200 flex items-center gap-2">
-              <MapPin className="h-5 w-5 text-indigo-600" /> BLOCO 2 – Endereço
+              <MapPin className="h-5 w-5 text-indigo-600" /> BLOCO 2 – LOCALIZAÇÃO
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">CEP</label>
-                <input required type="text" name="cep" value={formData.cep} onChange={handleCepChange} maxLength={8} placeholder="Somente números" className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none" />
-                {loadingCep && <span className="text-xs text-indigo-600 mt-1">Buscando CEP...</span>}
-                {cepError && <span className="text-xs text-red-600 mt-1">{cepError}</span>}
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">CEP <span className="text-red-500">*</span></label>
+                <input type="text" name="cep" value={formData.cep} onChange={handleCepChange} maxLength={8} placeholder="Somente números" className={`w-full px-4 py-3 bg-slate-50 border ${cepError ? 'border-red-300' : 'border-slate-200'} rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none`} />
+                {loadingCep && <p className="text-xs text-indigo-600 mt-1">Buscando CEP...</p>}
+                {cepError && <p className="text-xs text-red-600 mt-1">{cepError}</p>}
+              </div>
+              <div className="md:col-span-1">
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Rua / Logradouro</label>
+                <input type="text" name="street" value={formData.street} onChange={handleChange} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none" placeholder="Rua" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Número</label>
+                <input type="text" name="addressNumber" value={formData.addressNumber} onChange={handleChange} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none" placeholder="S/N" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Bairro</label>
+                <input type="text" name="neighborhood" value={formData.neighborhood} onChange={handleChange} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none" placeholder="Bairro" />
               </div>
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-slate-700 mb-1">Rua / Logradouro</label>
-                <input required type="text" name="street" value={formData.street} onChange={handleChange} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none" />
+                <label className="block text-sm font-medium text-slate-700 mb-2">Região Administrativa (pode selecionar mais de uma)</label>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                  {(formData.city ? getRegioesPorCidade(formData.city) : REGIOES).map((r) => (
+                    <label key={r} className={`flex items-center gap-2 p-2.5 border rounded-lg cursor-pointer transition-colors ${formData.administrativeRegions.includes(r) ? 'border-indigo-400 bg-indigo-50' : 'border-slate-200 hover:bg-slate-50'}`}>
+                      <input
+                        type="checkbox"
+                        checked={formData.administrativeRegions.includes(r)}
+                        onChange={() => setFormData(prev => ({ ...prev, administrativeRegions: toggleArrayItem(prev.administrativeRegions, r) }))}
+                        className="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-600"
+                      />
+                      <span className="text-sm font-medium text-slate-700">{r}</span>
+                    </label>
+                  ))}
+                </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Número / Complemento</label>
-                <input type="text" name="addressNumber" value={formData.addressNumber} onChange={handleChange} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Bairro</label>
-                <input required type="text" name="neighborhood" value={formData.neighborhood} onChange={handleChange} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Região Administrativa</label>
-                <input type="text" name="administrativeRegion" value={formData.administrativeRegion} onChange={handleChange} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Cidade</label>
-                <input required type="text" name="city" value={formData.city} onChange={handleChange} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none" />
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Cidade</label>
+                <input type="text" name="city" value={formData.city} onChange={handleChange} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none" placeholder="Cidade" />
               </div>
             </div>
           </section>

@@ -15,6 +15,9 @@ export default function PublicForm() {
   const [loading, setLoading] = useState(true);
 
   const [name, setName] = useState('');
+  const [preferredName, setPreferredName] = useState('');
+  const [birthDate, setBirthDate] = useState('');
+  const [sexo, setSexo] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [cpf, setCpf] = useState('');
@@ -238,6 +241,24 @@ export default function PublicForm() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  Como prefere ser chamado <span className="text-red-500">*</span>
+                </label>
+                <input required type="text" value={preferredName} onChange={(e) => setPreferredName(e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none" placeholder="Apelido ou nome social" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  Data de nascimento <span className="text-red-500">*</span>
+                </label>
+                <input required type="text" value={birthDate} onChange={(e) => {
+                  const val = e.target.value.replace(/\D/g, '').slice(0, 8);
+                  let formatted = val;
+                  if (val.length > 2) formatted = val.slice(0, 2) + '/' + val.slice(2);
+                  if (val.length > 4) formatted = formatted.slice(0, 5) + '/' + formatted.slice(5);
+                  setBirthDate(formatted);
+                }} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none" placeholder="dd/mm/aaaa" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
                   Telefone / WhatsApp <span className="text-red-500">*</span>
                 </label>
                 <input required type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none" placeholder="(00) 00000-0000" />
@@ -251,6 +272,22 @@ export default function PublicForm() {
                   CPF <span className="text-red-500">*</span>
                 </label>
                 <input required type="text" value={cpf} onChange={(e) => setCpf(e.target.value.replace(/\D/g, '').slice(0, 11))} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none" placeholder="000.000.000-00" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  Sexo <span className="text-red-500">*</span>
+                </label>
+                <select required value={sexo} onChange={(e) => setSexo(e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none">
+                  <option value="">Selecione...</option>
+                  <option value="Feminino">Feminino</option>
+                  <option value="Masculino">Masculino</option>
+                  <option value="Nao-binario">Não-binário</option>
+                  <option value="Travesti_Mulher_Trans">Travesti / Mulher Trans</option>
+                  <option value="Homem_Trans">Homem Trans</option>
+                  <option value="Genero_Fluido">Gênero Fluido</option>
+                  <option value="Outro">Outro</option>
+                  <option value="Prefiro_nao_informar">Prefiro não informar</option>
+                </select>
               </div>
             </div>
           </section>
