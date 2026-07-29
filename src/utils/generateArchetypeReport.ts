@@ -167,8 +167,9 @@ export function generateArchetypeReport(profiles: ArchetypeProfile[]) {
   }
   y += GAP;
 
-  // --- Profile sections ---
-  for (const profile of profiles) {
+  // --- Profile sections (one per page) ---
+  for (const [idx, profile] of profiles.entries()) {
+    if (idx > 0) newPage();
     need(14);
 
     const displayName = profile.leader?.name || profile.leader_name || 'Desconhecido';
