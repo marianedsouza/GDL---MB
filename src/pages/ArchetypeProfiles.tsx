@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Brain, Loader2, ChevronDown, ChevronUp, Search, AlertCircle, TrendingUp, Users, Heart, BarChart3, Filter } from 'lucide-react';
+import { Brain, Loader2, ChevronDown, ChevronUp, Search, AlertCircle, TrendingUp, Users, Heart, BarChart3, Filter, Download, CheckSquare, Square, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../components/AdminLayout';
+import { generateArchetypeReport } from '../utils/generateArchetypeReport';
 
 interface ArchetypeProfile {
   id: string;
@@ -42,9 +43,33 @@ export default function ArchetypeProfiles() {
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState('');
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState('');
   const [filterDominant, setFilterDominant] = useState('');
   const [sortBy, setSortBy] = useState('name');
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const selectAll = () => {
+    setSelectedIds(new Set(filtered.map(p => p.id)));
+  };
+
+  const clearSelection = () => {
+    setSelectedIds(new Set());
+  };
+
+  const handleDownloadPdf = () => {
+    const selected = profiles.filter(p => selectedIds.has(p.id));
+    if (selected.length === 0) return;
+    generateArchetypeReport(selected);
+  };
 
   useEffect(() => {
     fetchProfiles();
@@ -189,6 +214,25 @@ export default function ArchetypeProfiles() {
           <p className="text-slate-500 text-sm">Estudo completo de cada líder</p>
         </div>
         <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+          {selectedIds.size > 0 && (
+            <button onClick={handleDownloadPdf}
+              className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors"
+            >
+              <FileText className="w-4 h-4" /> Gerar Relatório PDF ({selectedIds.size})
+            </button>
+          )}
+          <button onClick={selectAll}
+            className="flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 text-slate-700 text-sm rounded-lg hover:bg-slate-50 transition-colors"
+          >
+            <CheckSquare className="w-4 h-4" /> Selecionar Todos
+          </button>
+          {selectedIds.size > 0 && (
+            <button onClick={clearSelection}
+              className="flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 text-slate-700 text-sm rounded-lg hover:bg-slate-50 transition-colors"
+            >
+              <Square className="w-4 h-4" /> Limpar
+            </button>
+          )}
           <div className="relative flex-1 sm:flex-initial min-w-[160px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input type="text" value={search} onChange={e => setSearch(e.target.value)}
@@ -233,9 +277,15 @@ export default function ArchetypeProfiles() {
 
             return (
               <div key={profile.id} className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                <button onClick={() => setExpandedId(isExpanded ? null : profile.id)}
-                  className="w-full flex items-center justify-between p-5 hover:bg-slate-50 transition-colors text-left"
-                >
+                <div className="flex items-stretch">
+                  <button onClick={() => toggleSelect(profile.id)}
+                    className={`flex items-center justify-center px-4 border-r transition-colors ${selectedIds.has(profile.id) ? 'bg-indigo-50 text-indigo-600 border-indigo-200' : 'text-slate-300 hover:text-slate-400 border-slate-100'}`}
+                  >
+                    {selectedIds.has(profile.id) ? <CheckSquare className="w-5 h-5" /> : <Square className="w-5 h-5" />}
+                  </button>
+                  <button onClick={() => setExpandedId(isExpanded ? null : profile.id)}
+                    className={`flex-1 flex items-center justify-between p-5 hover:bg-slate-50 transition-colors text-left ${selectedIds.has(profile.id) ? 'bg-indigo-50/30' : ''}`}
+                  >
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
                       {displayName.charAt(0)}
@@ -373,6 +423,7 @@ export default function ArchetypeProfiles() {
                   </div>
                 )}
               </div>
+            </div>
             );
           })}
         </div>
