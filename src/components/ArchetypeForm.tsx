@@ -436,9 +436,6 @@ export default function ArchetypeForm({ leaderId, leaderName }: ArchetypeFormPro
     }
     setResults(result);
 
-    setSubmitted(true);
-    setSubmitting(false);
-
     try {
       const res = await fetch('/api/public/archetype', {
         method: 'POST',
@@ -457,8 +454,11 @@ export default function ArchetypeForm({ leaderId, leaderName }: ArchetypeFormPro
         const errData = await res.json();
         throw new Error(errData.details || errData.error || 'Erro ao salvar');
       }
+      setSubmitted(true);
     } catch (err: any) {
       setSubmitError(err.message || 'Erro ao salvar mapeamento. Verifique se o banco de dados foi configurado.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
