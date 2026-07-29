@@ -328,7 +328,6 @@ app.post('/api/public/archetype', async (req, res) => {
         secondary: results.secondary,
         potency: results.potency || results.secondary,
         shadow: results.shadow,
-        shadowIntensity: results.shadowIntensity || results.wounded?.score || results.shadow?.score,
         wounded: results.wounded,
         evolution: results.evolution,
         percentages: results.percentages,
