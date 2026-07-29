@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Plus, Trash2, Link as LinkIcon, Users, ExternalLink, Download, Share2, Copy, Check, Brain, AlertCircle } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import AdminLayout from '../components/AdminLayout';
 
 interface Leader {
@@ -13,8 +13,10 @@ interface Leader {
 }
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const [leaders, setLeaders] = useState<Leader[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
   const [newName, setNewName] = useState('');
   const [newPhone, setNewPhone] = useState('');
@@ -34,12 +36,19 @@ export default function Dashboard() {
       const res = await fetch('/api/leaders', {
         headers: { Authorization: `Bearer ${token}` }
       });
+      if (res.status === 401) {
+        localStorage.removeItem('token');
+        navigate('/admin/login');
+        return;
+      }
       if (res.ok) {
         const data = await res.json();
         setLeaders(data);
+      } else {
+        setFetchError('Erro ao carregar dados.');
       }
     } catch (err) {
-      console.error(err);
+      setFetchError('Erro de conexão.');
     } finally {
       setLoading(false);
     }
@@ -278,6 +287,21 @@ export default function Dashboard() {
 
       {loading ? (
         <div className="text-center py-12 text-slate-500">Carregando...</div>
+      ) : fetchError ? (
+        <div className="text-center py-16 bg-white rounded-xl border border-red-200 border-dashed">
+          <AlertCircle className="mx-auto h-12 w-12 text-red-300 mb-3" />
+          <p className="text-red-500 font-medium">{fetchError}</p>
+          <button onClick={() => { setLoading(true); setFetchError(''); fetchLeaders(); }}
+            className="mt-4 px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 transition-colors"
+          >
+            Tentar novamente
+          </button>
+          <button onClick={() => navigate('/admin/login')}
+            className="mt-2 mx-2 px-4 py-2 bg-white border border-slate-300 text-slate-700 text-sm rounded-lg hover:bg-slate-50 transition-colors"
+          >
+            Fazer login novamente
+          </button>
+        </div>
       ) : leaders.length === 0 ? (
         <div className="text-center py-16 bg-white rounded-xl border border-slate-200 border-dashed">
           <Users className="mx-auto h-12 w-12 text-slate-300 mb-3" />

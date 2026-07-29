@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Brain, Loader2, Users, ChevronDown, ChevronUp, Search } from 'lucide-react';
+import { Brain, Loader2, Users, ChevronDown, ChevronUp, Search, AlertCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../components/AdminLayout';
 
 interface ArchetypeProfile {
@@ -34,8 +35,10 @@ const ARCHETYPE_COLORS: Record<string, { label: string; color: string; bg: strin
 };
 
 export default function ArchetypeProfiles() {
+  const navigate = useNavigate();
   const [profiles, setProfiles] = useState<ArchetypeProfile[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState('');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [search, setSearch] = useState('');
 
@@ -49,12 +52,19 @@ export default function ArchetypeProfiles() {
       const res = await fetch('/api/archetype/profiles', {
         headers: { Authorization: `Bearer ${token}` }
       });
+      if (res.status === 401) {
+        localStorage.removeItem('token');
+        navigate('/admin/login');
+        return;
+      }
       if (res.ok) {
         const data = await res.json();
         setProfiles(data);
+      } else {
+        setFetchError('Erro ao carregar perfis.');
       }
     } catch (err) {
-      console.error(err);
+      setFetchError('Erro de conexão.');
     } finally {
       setLoading(false);
     }
@@ -86,6 +96,21 @@ export default function ArchetypeProfiles() {
 
       {loading ? (
         <div className="text-center py-12 text-slate-500">Carregando...</div>
+      ) : fetchError ? (
+        <div className="text-center py-16 bg-white rounded-xl border border-red-200 border-dashed">
+          <AlertCircle className="mx-auto h-12 w-12 text-red-300 mb-3" />
+          <p className="text-red-500 font-medium">{fetchError}</p>
+          <button onClick={() => { setLoading(true); setFetchError(''); fetchProfiles(); }}
+            className="mt-4 px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 transition-colors"
+          >
+            Tentar novamente
+          </button>
+          <button onClick={() => navigate('/admin/login')}
+            className="mt-2 mx-2 px-4 py-2 bg-white border border-slate-300 text-slate-700 text-sm rounded-lg hover:bg-slate-50 transition-colors"
+          >
+            Fazer login novamente
+          </button>
+        </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-16 bg-white rounded-xl border border-slate-200 border-dashed">
           <Brain className="mx-auto h-12 w-12 text-slate-300 mb-3" />

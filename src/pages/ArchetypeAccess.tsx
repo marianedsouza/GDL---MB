@@ -43,7 +43,7 @@ export default function ArchetypeAccess() {
 
   if (loading) {
     return (
-      <div className="min-h-dvh bg-gradient-to-br from-indigo-50 to-purple-50 flex items-center justify-center p-4">
+      <div className="min-h-[100dvh] bg-gradient-to-br from-indigo-50 to-purple-50 flex items-center justify-center p-4">
         <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-sm text-center border border-slate-200">
           <Loader2 className="h-8 w-8 sm:h-10 sm:w-10 text-indigo-600 animate-spin mx-auto mb-3 sm:mb-4" />
           <p className="text-sm sm:text-base text-slate-600">Carregando...</p>
@@ -54,7 +54,7 @@ export default function ArchetypeAccess() {
 
   if (error) {
     return (
-      <div className="min-h-dvh bg-gradient-to-br from-red-50 to-orange-50 flex flex-col items-center justify-center p-4">
+      <div className="min-h-[100dvh] bg-gradient-to-br from-red-50 to-orange-50 flex flex-col items-center justify-center p-4">
         <div className="max-w-md w-full bg-white p-6 sm:p-8 rounded-2xl shadow-sm text-center border border-slate-200">
           <AlertCircle className="h-8 w-8 sm:h-10 sm:w-10 text-red-500 mx-auto mb-3 sm:mb-4" />
           <h2 className="text-lg sm:text-xl font-semibold text-slate-800 mb-2">Erro</h2>
@@ -70,7 +70,7 @@ export default function ArchetypeAccess() {
 
   if (alreadyCompleted) {
     return (
-      <div className="min-h-dvh bg-gradient-to-br from-green-50 to-indigo-50 flex flex-col items-center justify-center p-4">
+      <div className="min-h-[100dvh] bg-gradient-to-br from-green-50 to-indigo-50 flex flex-col items-center justify-center p-4">
         <div className="max-w-lg w-full bg-white p-6 sm:p-8 rounded-2xl shadow-sm text-center border border-slate-200">
           <CheckCircle2 className="h-10 w-10 sm:h-12 sm:w-12 text-green-500 mx-auto mb-3 sm:mb-4" />
           <h2 className="text-xl sm:text-2xl font-bold text-slate-800 mb-2">Mapeamento já realizado!</h2>
@@ -86,7 +86,7 @@ export default function ArchetypeAccess() {
   }
 
   return (
-    <div className="min-h-dvh bg-gradient-to-br from-indigo-50 to-purple-50 flex flex-col items-center justify-center p-4">
+    <div className="min-h-[100dvh] bg-gradient-to-br from-indigo-50 to-purple-50 flex flex-col items-center justify-center p-4">
       <div className="max-w-lg w-full bg-white p-6 sm:p-8 rounded-2xl shadow-sm text-center border border-slate-200">
         <Brain className="h-10 w-10 sm:h-12 sm:w-12 text-indigo-500 mx-auto mb-3 sm:mb-4" />
         <h2 className="text-xl sm:text-2xl font-bold text-slate-800 mb-2">Mapeamento Arquetípico</h2>

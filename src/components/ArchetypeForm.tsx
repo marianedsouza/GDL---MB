@@ -487,7 +487,7 @@ export default function ArchetypeForm({ leaderId, leaderName }: ArchetypeFormPro
       const evoInfo = ARCHETYPE_DESCRIPTIONS[evolution.name];
 
       return (
-        <div className="min-h-dvh bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
+        <div className="min-h-[100dvh] bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
           <div className="max-w-2xl mx-auto px-3 sm:px-4 py-4 sm:py-8">
             <div className="bg-white rounded-2xl shadow-sm border border-slate-200">
               <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-4 sm:px-8 py-6 sm:py-10 text-center text-white">
@@ -662,7 +662,7 @@ export default function ArchetypeForm({ leaderId, leaderName }: ArchetypeFormPro
       );
     } catch (err: any) {
       return (
-        <div className="min-h-dvh bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center p-4">
+        <div className="min-h-[100dvh] bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center p-4">
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 max-w-md text-center">
             <AlertTriangle className="w-10 h-10 text-amber-500 mx-auto mb-3" />
             <h2 className="text-lg font-semibold text-slate-800 mb-2">Erro ao exibir resultados</h2>
@@ -693,7 +693,7 @@ export default function ArchetypeForm({ leaderId, leaderName }: ArchetypeFormPro
   const StepIcon = stepIcon;
 
   return (
-    <div className="min-h-dvh bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
+    <div className="min-h-[100dvh] bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
       <div className="max-w-3xl mx-auto px-3 sm:px-4 py-4 sm:py-8">
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200">
           <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-4 sm:px-8 py-5 sm:py-8 text-center text-white">
