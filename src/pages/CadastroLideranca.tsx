@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { User, Phone, Mail, MapPin, Briefcase, CheckCircle2 } from 'lucide-react';
+import { User, Phone, Mail, MapPin, Briefcase, CheckCircle2, Brain } from 'lucide-react';
+import ArchetypeForm from '../components/ArchetypeForm';
 
 export default function CadastroLideranca() {
   const [formData, setFormData] = useState({
@@ -33,6 +34,8 @@ export default function CadastroLideranca() {
 
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [submittedLeaderId, setSubmittedLeaderId] = useState('');
+  const [showArchetype, setShowArchetype] = useState(false);
   const [error, setError] = useState('');
   const [cepError, setCepError] = useState('');
   const [loadingCep, setLoadingCep] = useState(false);
@@ -107,6 +110,7 @@ export default function CadastroLideranca() {
       const data = await res.json();
       if (res.ok) {
         setSuccess(true);
+        setSubmittedLeaderId(data._id || data.id);
       } else {
         if (data.details && data.details.includes("Could not find the")) {
            setError("Erro: Você precisa adicionar as novas colunas à tabela 'leaders' no Supabase. " + data.details);
@@ -121,23 +125,38 @@ export default function CadastroLideranca() {
     }
   };
 
+  if (showArchetype) {
+    return <ArchetypeForm leaderId={submittedLeaderId} leaderName={formData.name} />;
+  }
+
   if (success) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-sm text-center border border-slate-200">
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-indigo-50 flex flex-col items-center justify-center p-4">
+        <div className="max-w-lg w-full bg-white p-8 rounded-2xl shadow-sm text-center border border-slate-200">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle2 className="h-8 w-8 text-green-600" />
           </div>
           <h2 className="text-2xl font-semibold text-slate-800 mb-2">Cadastro Realizado!</h2>
-          <p className="text-slate-600 mb-6">
-            Obrigado por se juntar à Equipe MB.
+          <p className="text-slate-600 mb-2">
+            Obrigado por se juntar à Equipe MB, <strong>{formData.name}</strong>.
           </p>
-          <button
-            onClick={() => window.location.reload()}
-            className="text-indigo-600 font-medium hover:text-indigo-700"
-          >
-            Fazer novo cadastro
-          </button>
+          <p className="text-slate-500 text-sm mb-8">
+            Agora você pode fazer o Mapeamento Arquetípico para descobrir seu perfil.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <button
+              onClick={() => setShowArchetype(true)}
+              className="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all shadow-md"
+            >
+              <Brain className="w-5 h-5" /> Fazer Mapeamento Arquetípico
+            </button>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-6 py-3 text-slate-600 font-medium rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors"
+            >
+              Fazer novo cadastro
+            </button>
+          </div>
         </div>
       </div>
     );

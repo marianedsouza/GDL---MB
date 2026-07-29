@@ -244,4 +244,28 @@ app.post('/api/public/leads', async (req, res) => {
   }
 });
 
+// Public: save archetype mapping
+app.post('/api/public/archetype', async (req, res) => {
+  try {
+    const { leaderId, leaderName, answers, results } = req.body;
+    const { error } = await supabase
+      .from('archetype_responses')
+      .insert([{
+        leader_id: leaderId,
+        leader_name: leaderName,
+        answers,
+        dominant: results.dominant,
+        secondary: results.secondary,
+        shadow: results.shadow,
+        evolution: results.evolution,
+        percentages: results.percentages,
+      }]);
+    if (error) throw error;
+    res.json({ success: true });
+  } catch (err: any) {
+    console.error(err);
+    res.status(500).json({ error: 'Erro ao salvar mapeamento', details: err.message });
+  }
+});
+
 export default app;
