@@ -1,4 +1,3 @@
-import 'dotenv/config';
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import { createClient } from '@supabase/supabase-js';
