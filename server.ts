@@ -117,8 +117,9 @@ app.post('/api/public/leaders', async (req, res) => {
       birth_date: payload.birthDate,
       phone: payload.phone,
       email: payload.email,
+      sexo: payload.sexo,
       neighborhood: payload.neighborhood,
-      administrative_region: payload.administrativeRegion,
+      administrative_region: Array.isArray(payload.administrativeRegions) ? payload.administrativeRegions.join(', ') : payload.administrativeRegions,
       city: payload.city,
       role: payload.role,
       segment: payload.segment,
@@ -247,7 +248,7 @@ app.get('/api/public/leaders/:id', async (req, res) => {
 // Public: Submit lead form
 app.post('/api/public/leads', async (req, res) => {
   try {
-    const { leaderId, registeredBy, name, phone, email, cpf, street, number, neighborhood, administrativeRegions, city, contactOrigins, segments, relationshipLevels, influencePotentials, nextActions, observations } = req.body;
+    const { leaderId, registeredBy, name, preferredName, birthDate, sexo, phone, email, cpf, street, number, neighborhood, administrativeRegions, city, contactOrigins, segments, relationshipLevels, influencePotentials, nextActions, observations } = req.body;
     
     const { data: leader, error: leaderError } = await supabase
       .from('leaders')
@@ -282,11 +283,15 @@ app.post('/api/public/leads', async (req, res) => {
       .insert([{
         leader_id: leaderId,
         registered_by: registeredBy,
-        name, phone, email, cpf,
+        name,
+        preferred_name: preferredName,
+        birth_date: birthDate,
+        sexo,
+        phone, email, cpf,
         street,
         address_number: number,
         neighborhood,
-        administrative_region: administrativeRegions,
+        administrative_region: Array.isArray(administrativeRegions) ? administrativeRegions.join(', ') : administrativeRegions,
         city,
         contact_origin: contactOrigins,
         segment: segments,
@@ -321,7 +326,10 @@ app.post('/api/public/archetype', async (req, res) => {
         text_answers: textAnswers,
         dominant: results.dominant,
         secondary: results.secondary,
+        potency: results.potency || results.secondary,
         shadow: results.shadow,
+        shadowIntensity: results.shadowIntensity || results.wounded?.score || results.shadow?.score,
+        wounded: results.wounded,
         evolution: results.evolution,
         percentages: results.percentages,
       }]);

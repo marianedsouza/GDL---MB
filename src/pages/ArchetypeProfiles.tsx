@@ -8,26 +8,29 @@ interface ArchetypeProfile {
   leader_name: string;
   dominant: { name: string; score: number };
   secondary: { name: string; score: number };
-  shadow: { score: number };
+  potency?: { name: string; score: number };
+  shadow: { name?: string; score: number };
+  shadowIntensity?: number;
+  wounded?: { score: number };
   evolution: { name: string; score: number };
   percentages: Record<string, number>;
   created_at: string;
   leader: { full_name: string; name: string; phone: string; email: string; cpf: string } | null;
 }
 
-const ARCHETYPE_COLORS: Record<string, { label: string; color: string; bg: string; bar: string }> = {
-  Cuidadora: { label: 'Cuidadora', color: 'text-emerald-600', bg: 'bg-emerald-50 border-emerald-200', bar: 'bg-emerald-500' },
-  Rebelde: { label: 'Rebelde', color: 'text-red-600', bg: 'bg-red-50 border-red-200', bar: 'bg-red-500' },
-  Sábia: { label: 'Sábia', color: 'text-blue-600', bg: 'bg-blue-50 border-blue-200', bar: 'bg-blue-500' },
-  Exploradora: { label: 'Exploradora', color: 'text-amber-600', bg: 'bg-amber-50 border-amber-200', bar: 'bg-amber-500' },
-  Criadora: { label: 'Criadora', color: 'text-violet-600', bg: 'bg-violet-50 border-violet-200', bar: 'bg-violet-500' },
-  Governante: { label: 'Governante', color: 'text-purple-600', bg: 'bg-purple-50 border-purple-200', bar: 'bg-purple-500' },
-  Inocente: { label: 'Inocente', color: 'text-sky-600', bg: 'bg-sky-50 border-sky-200', bar: 'bg-sky-500' },
-  Amante: { label: 'Amante', color: 'text-pink-600', bg: 'bg-pink-50 border-pink-200', bar: 'bg-pink-500' },
-  Mago: { label: 'Mago', color: 'text-indigo-600', bg: 'bg-indigo-50 border-indigo-200', bar: 'bg-indigo-500' },
-  Guerreira: { label: 'Guerreira', color: 'text-orange-600', bg: 'bg-orange-50 border-orange-200', bar: 'bg-orange-500' },
-  Boba: { label: 'Boba', color: 'text-yellow-600', bg: 'bg-yellow-50 border-yellow-200', bar: 'bg-yellow-500' },
-  Sombra: { label: 'Sombra', color: 'text-slate-500', bg: 'bg-slate-50 border-slate-200', bar: 'bg-slate-400' },
+const ARCHETYPE_COLORS: Record<string, { label: string; color: string; bg: string; bar: string; jung: string }> = {
+  Cuidadora: { label: 'Cuidadora', color: 'text-emerald-600', bg: 'bg-emerald-50 border-emerald-200', bar: 'bg-emerald-500', jung: 'Persona Materna' },
+  Rebelde: { label: 'Rebelde', color: 'text-red-600', bg: 'bg-red-50 border-red-200', bar: 'bg-red-500', jung: 'Sombra do Sistema' },
+  Sábia: { label: 'Sábia', color: 'text-blue-600', bg: 'bg-blue-50 border-blue-200', bar: 'bg-blue-500', jung: 'Self — O Sábio' },
+  Exploradora: { label: 'Exploradora', color: 'text-amber-600', bg: 'bg-amber-50 border-amber-200', bar: 'bg-amber-500', jung: 'Animus — Busca' },
+  Criadora: { label: 'Criadora', color: 'text-violet-600', bg: 'bg-violet-50 border-violet-200', bar: 'bg-violet-500', jung: 'Self Criativo' },
+  Governante: { label: 'Governante', color: 'text-purple-600', bg: 'bg-purple-50 border-purple-200', bar: 'bg-purple-500', jung: 'Persona de Poder' },
+  Inocente: { label: 'Inocente', color: 'text-sky-600', bg: 'bg-sky-50 border-sky-200', bar: 'bg-sky-500', jung: 'Self Original' },
+  Amante: { label: 'Amante', color: 'text-pink-600', bg: 'bg-pink-50 border-pink-200', bar: 'bg-pink-500', jung: 'Anima — Eros' },
+  Mago: { label: 'Mago', color: 'text-indigo-600', bg: 'bg-indigo-50 border-indigo-200', bar: 'bg-indigo-500', jung: 'Self Transpessoal' },
+  Guerreira: { label: 'Guerreira', color: 'text-orange-600', bg: 'bg-orange-50 border-orange-200', bar: 'bg-orange-500', jung: 'Persona Heroica' },
+  Boba: { label: 'Boba', color: 'text-yellow-600', bg: 'bg-yellow-50 border-yellow-200', bar: 'bg-yellow-500', jung: 'Trickster' },
+  Sombra: { label: 'Sombra', color: 'text-slate-500', bg: 'bg-slate-50 border-slate-200', bar: 'bg-slate-400', jung: 'Inconsciente Pessoal' },
 };
 
 export default function ArchetypeProfiles() {
@@ -125,34 +128,47 @@ export default function ArchetypeProfiles() {
 
                 {isExpanded && (
                   <div className="px-5 pb-5 border-t border-slate-100 pt-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
                       <div className="p-4 rounded-xl bg-gradient-to-br from-indigo-50 to-purple-50 border border-indigo-100">
-                        <p className="text-xs font-semibold text-indigo-500 uppercase tracking-wider">Dominante</p>
-                        <p className="text-xl font-bold text-indigo-700 mt-1">{profile.dominant?.name || '-'}</p>
+                        <p className="text-[10px] font-semibold text-indigo-400 uppercase tracking-wider">Persona</p>
+                        <p className="text-xs font-semibold text-indigo-500 uppercase tracking-wider mt-0.5">Dominante</p>
+                        <p className="text-lg font-bold text-indigo-700 mt-1">{profile.dominant?.name || '-'}</p>
                         <div className="mt-2 w-full bg-indigo-200 rounded-full h-2">
                           <div className="bg-indigo-600 h-2 rounded-full" style={{ width: `${profile.dominant?.score || 0}%` }} />
                         </div>
                         <p className="text-sm text-indigo-500 mt-1">{profile.dominant?.score || 0}%</p>
                       </div>
                       <div className="p-4 rounded-xl bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-100">
-                        <p className="text-xs font-semibold text-amber-500 uppercase tracking-wider">Secundário</p>
-                        <p className="text-xl font-bold text-amber-700 mt-1">{profile.secondary?.name || '-'}</p>
+                        <p className="text-[10px] font-semibold text-amber-400 uppercase tracking-wider">Anima/Animus</p>
+                        <p className="text-xs font-semibold text-amber-500 uppercase tracking-wider mt-0.5">Potência</p>
+                        <p className="text-lg font-bold text-amber-700 mt-1">{profile.potency?.name || profile.secondary?.name || '-'}</p>
                         <div className="mt-2 w-full bg-amber-200 rounded-full h-2">
-                          <div className="bg-amber-500 h-2 rounded-full" style={{ width: `${profile.secondary?.score || 0}%` }} />
+                          <div className="bg-amber-500 h-2 rounded-full" style={{ width: `${profile.potency?.score || profile.secondary?.score || 0}%` }} />
                         </div>
-                        <p className="text-sm text-amber-500 mt-1">{profile.secondary?.score || 0}%</p>
+                        <p className="text-sm text-amber-500 mt-1">{profile.potency?.score || profile.secondary?.score || 0}%</p>
                       </div>
-                      <div className="p-4 rounded-xl bg-gradient-to-br from-slate-50 to-gray-50 border border-slate-200">
-                        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Sombra</p>
-                        <p className="text-xl font-bold text-slate-600 mt-1">Sombra</p>
+                      <div className="p-4 rounded-xl bg-gradient-to-br from-slate-50 to-red-50 border border-slate-200">
+                        <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Sombra</p>
+                        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-0.5">Arquétipo Reprimido</p>
+                        <p className="text-lg font-bold text-slate-600 mt-1">{profile.shadow?.name || 'Sombra'}</p>
                         <div className="mt-2 w-full bg-slate-200 rounded-full h-2">
                           <div className="bg-slate-400 h-2 rounded-full" style={{ width: `${profile.shadow?.score || 0}%` }} />
                         </div>
                         <p className="text-sm text-slate-500 mt-1">{profile.shadow?.score || 0}%</p>
                       </div>
+                      <div className="p-4 rounded-xl bg-gradient-to-br from-rose-50 to-pink-50 border border-rose-100">
+                        <p className="text-[10px] font-semibold text-rose-400 uppercase tracking-wider">Complexo</p>
+                        <p className="text-xs font-semibold text-rose-500 uppercase tracking-wider mt-0.5">Ferida</p>
+                        <p className="text-lg font-bold text-rose-700 mt-1">{profile.wounded?.score || profile.shadowIntensity || 0}%</p>
+                        <div className="mt-2 w-full bg-rose-200 rounded-full h-2">
+                          <div className="bg-rose-400 h-2 rounded-full" style={{ width: `${profile.wounded?.score || profile.shadowIntensity || 0}%` }} />
+                        </div>
+                        <p className="text-sm text-rose-500 mt-1">{profile.wounded?.score || profile.shadowIntensity || 0}%</p>
+                      </div>
                       <div className="p-4 rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100">
-                        <p className="text-xs font-semibold text-emerald-500 uppercase tracking-wider">Evolução</p>
-                        <p className="text-xl font-bold text-emerald-700 mt-1">{profile.evolution?.name || '-'}</p>
+                        <p className="text-[10px] font-semibold text-emerald-400 uppercase tracking-wider">Self</p>
+                        <p className="text-xs font-semibold text-emerald-500 uppercase tracking-wider mt-0.5">Evolução</p>
+                        <p className="text-lg font-bold text-emerald-700 mt-1">{profile.evolution?.name || '-'}</p>
                         <div className="mt-2 w-full bg-emerald-200 rounded-full h-2">
                           <div className="bg-emerald-500 h-2 rounded-full" style={{ width: `${profile.evolution?.score || 0}%` }} />
                         </div>

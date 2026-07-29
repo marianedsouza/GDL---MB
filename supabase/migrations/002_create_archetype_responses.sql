@@ -9,7 +9,10 @@ CREATE TABLE IF NOT EXISTS archetype_responses (
   text_answers JSONB,
   dominant JSONB,
   secondary JSONB,
+  potency JSONB,
   shadow JSONB,
+  shadowIntensity NUMERIC,
+  wounded JSONB,
   evolution JSONB,
   percentages JSONB
 );

@@ -177,19 +177,101 @@ const TEXT_QUESTIONS = [
   { id: 57, text: 'Como você gostaria de ser lembrado ou que sua marca seja lembrada?' },
 ];
 
-const ARCHETYPE_DESCRIPTIONS: Record<string, { label: string; color: string; bg: string }> = {
-  Cuidadora: { label: 'Cuidadora', color: 'text-emerald-600', bg: 'bg-emerald-50 border-emerald-200' },
-  Rebelde: { label: 'Rebelde', color: 'text-red-600', bg: 'bg-red-50 border-red-200' },
-  Sábia: { label: 'Sábia', color: 'text-blue-600', bg: 'bg-blue-50 border-blue-200' },
-  Exploradora: { label: 'Exploradora', color: 'text-amber-600', bg: 'bg-amber-50 border-amber-200' },
-  Criadora: { label: 'Criadora', color: 'text-violet-600', bg: 'bg-violet-50 border-violet-200' },
-  Governante: { label: 'Governante', color: 'text-purple-600', bg: 'bg-purple-50 border-purple-200' },
-  Inocente: { label: 'Inocente', color: 'text-sky-600', bg: 'bg-sky-50 border-sky-200' },
-  Amante: { label: 'Amante', color: 'text-pink-600', bg: 'bg-pink-50 border-pink-200' },
-  Mago: { label: 'Mago', color: 'text-indigo-600', bg: 'bg-indigo-50 border-indigo-200' },
-  Guerreira: { label: 'Guerreira', color: 'text-orange-600', bg: 'bg-orange-50 border-orange-200' },
-  Boba: { label: 'Boba', color: 'text-yellow-600', bg: 'bg-yellow-50 border-yellow-200' },
-  Sombra: { label: 'Sombra', color: 'text-slate-500', bg: 'bg-slate-50 border-slate-200' },
+interface ArchetypeInfo {
+  label: string;
+  color: string;
+  bg: string;
+  jung: string;
+  luz: string;
+  sombra: string;
+  mensagem: string;
+}
+
+const ARCHETYPE_DESCRIPTIONS: Record<string, ArchetypeInfo> = {
+  Cuidadora: {
+    label: 'Cuidadora', color: 'text-emerald-600', bg: 'bg-emerald-50 border-emerald-200',
+    jung: 'Persona Materna — Complexo Materno',
+    luz: 'Acolhimento, empatia, proteção, generosidade',
+    sombra: 'Autossacrifício, codependência, culpa ao dizer não',
+    mensagem: 'Seu dom é nutrir. Lembre-se: para cuidar do outro é preciso cuidar de si.',
+  },
+  Rebelde: {
+    label: 'Rebelde', color: 'text-red-600', bg: 'bg-red-50 border-red-200',
+    jung: 'Sombra do Sistema — Questionamento do Status Quo',
+    luz: 'Inovação, coragem de romper, autenticidade',
+    sombra: 'Raiva destrutiva, rebeldia por impulso, isolamento',
+    mensagem: 'Sua força está em questionar. Canalize sua rebeldia para transformar o que precisa ser mudado.',
+  },
+  Sábia: {
+    label: 'Sábia', color: 'text-blue-600', bg: 'bg-blue-50 border-blue-200',
+    jung: 'Self — O Velho Sábio, Busca pela Verdade',
+    luz: 'Conhecimento, reflexão, discernimento, consciência',
+    sombra: 'Distanciamento emocional, arrogância intelectual, obsessão por respostas',
+    mensagem: 'Sua sabedoria ilumina. Compartilhe o que sabe sem perder a humildade de aprender.',
+  },
+  Exploradora: {
+    label: 'Exploradora', color: 'text-amber-600', bg: 'bg-amber-50 border-amber-200',
+    jung: 'Animus — O Explorador, Busca por Autonomia',
+    luz: 'Independência, liberdade, descoberta, autoconfiança',
+    sombra: 'Inquietude, incapacidade de se comprometer, fuga emocional',
+    mensagem: 'Sua alma busca novos horizontes. Explore o mundo externo sem fugir do seu mundo interno.',
+  },
+  Criadora: {
+    label: 'Criadora', color: 'text-violet-600', bg: 'bg-violet-50 border-violet-200',
+    jung: 'Self Criativo — Imaginação e Expressão do Inconsciente',
+    luz: 'Criatividade, inovação, originalidade, expressão',
+    sombra: 'Perfeccionismo paralisante, inconclusão, autocrítica excessiva',
+    mensagem: 'Você é uma canal de criação. Dê forma ao que existe dentro de você sem medo do julgamento.',
+  },
+  Governante: {
+    label: 'Governante', color: 'text-purple-600', bg: 'bg-purple-50 border-purple-200',
+    jung: 'Persona de Poder — Liderança e Responsabilidade Coletiva',
+    luz: 'Liderança, visão estratégica, responsabilidade, ordem',
+    sombra: 'Autoritarismo, necessidade de controle, medo de delegar',
+    mensagem: 'Você nasceu para liderar. Lembre-se: poder verdadeiro é servir com responsabilidade.',
+  },
+  Inocente: {
+    label: 'Inocente', color: 'text-sky-600', bg: 'bg-sky-50 border-sky-200',
+    jung: 'Self Original — O Paraíso Perdido, Confiança na Vida',
+    luz: 'Otimismo, pureza, esperança, simplicidade',
+    sombra: 'Ingenuidade, negação da realidade, dependência',
+    mensagem: 'Guarde sua essência pura. Confiar na vida é belo, mas a maturidade exige discernimento.',
+  },
+  Amante: {
+    label: 'Amante', color: 'text-pink-600', bg: 'bg-pink-50 border-pink-200',
+    jung: 'Anima — Eros, Conexão e Desejo de União',
+    luz: 'Paixão, conexão profunda, beleza, encantamento',
+    sombra: 'Carência afetiva, idealização do outro, ciúmes',
+    mensagem: 'Seu coração sente com profundidade. Ame sem se perder no outro — a união verdadeira começa dentro de você.',
+  },
+  Mago: {
+    label: 'Mago', color: 'text-indigo-600', bg: 'bg-indigo-50 border-indigo-200',
+    jung: 'Self Transpessoal — Individuação, Transformação Alquímica',
+    luz: 'Intuição, transformação, propósito, transcendência',
+    sombra: 'Manipulação, escapismo espiritual, desconexão da realidade',
+    mensagem: 'Você é um agente de transformação. Use seu poder para curar, não para controlar.',
+  },
+  Guerreira: {
+    label: 'Guerreira', color: 'text-orange-600', bg: 'bg-orange-50 border-orange-200',
+    jung: 'Persona Heroica — Coragem e Disciplina na Jornada',
+    luz: 'Coragem, disciplina, determinação, resiliência',
+    sombra: 'Agressividade, rigidez, exaustão por superexigência',
+    mensagem: 'Sua força é admirável. Mas a verdadeira guerreira sabe quando lutar e quando descansar.',
+  },
+  Boba: {
+    label: 'Boba', color: 'text-yellow-600', bg: 'bg-yellow-50 border-yellow-200',
+    jung: 'Trickster — O Bobo Sagrado, Sabedoria através do Riso',
+    luz: 'Humor, leveza, espontaneidade, alegria',
+    sombra: 'Irresponsabilidade, fuga emocional, cinismo',
+    mensagem: 'O riso é sua sabedoria. Use a leveza para desarmar, não para esconder a verdade.',
+  },
+  Sombra: {
+    label: 'Sombra', color: 'text-slate-500', bg: 'bg-slate-50 border-slate-200',
+    jung: 'Sombra — Conteúdo Reprimido do Inconsciente Pessoal',
+    luz: 'Autoconhecimento profundo, integração, humildade',
+    sombra: 'Projeção nos outros, negação, autossabotagem',
+    mensagem: 'O que você rejeita em si mesma ainda te governa. Integrar a sombra é o caminho para a liberdade.',
+  },
 };
 
 const TOTAL_STEPS = AXES.length + 2;
@@ -309,9 +391,13 @@ export default function ArchetypeForm({ leaderId, leaderName }: ArchetypeFormPro
       ? Math.round((shadowAnswers.reduce((acc, s) => acc + s.value, 0) / (shadowAnswers.length * 5)) * 100)
       : 0;
 
+    const activeArchetypes = sorted.filter(([, s]) => s > 0);
+    const dominant = activeArchetypes[0] || ['', 0];
+    const potency = activeArchetypes[1] || activeArchetypes[0] || ['', 0];
+
+    const shadowArchetypeEntry = [...activeArchetypes].reverse().find(([name]) => name !== dominant[0] && name !== 'Boba') || activeArchetypes[activeArchetypes.length - 1] || ['', 0];
+
     const evolutionCandidates = ['Governante', 'Mago', 'Sábia', 'Criadora', 'Exploradora'];
-    const dominant = sorted[0] || ['', 0];
-    const secondary = sorted[1] || sorted[0] || ['', 0];
     const evolution = evolutionCandidates
       .map((a) => ({ name: a, score: percentages[a] || 0 }))
       .sort((a, b) => b.score - a.score)
@@ -319,20 +405,26 @@ export default function ArchetypeForm({ leaderId, leaderName }: ArchetypeFormPro
 
     return {
       dominant: { name: dominant[0], score: dominant[1] },
-      secondary: { name: secondary[0], score: secondary[1] },
-      shadow: { score: shadowScore },
+      potency: { name: potency[0], score: potency[1] },
+      secondary: { name: potency[0], score: potency[1] },
+      shadow: { name: shadowArchetypeEntry[0], score: shadowArchetypeEntry[1] },
+      shadowIntensity: shadowScore,
+      wounded: { score: shadowScore },
       evolution: { name: evolution.name, score: evolution.score },
       percentages,
     };
   };
 
+  const [submitError, setSubmitError] = useState('');
+
   const handleSubmit = async () => {
     setSubmitting(true);
+    setSubmitError('');
     const result = calculateResults();
     setResults(result);
 
     try {
-      await fetch('/api/public/archetype', {
+      const res = await fetch('/api/public/archetype', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -345,8 +437,14 @@ export default function ArchetypeForm({ leaderId, leaderName }: ArchetypeFormPro
           results: result,
         }),
       });
-    } catch (err) {
-      console.error('Erro ao salvar mapeamento:', err);
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.details || errData.error || 'Erro ao salvar');
+      }
+    } catch (err: any) {
+      setSubmitError(err.message || 'Erro ao salvar mapeamento. Verifique se o banco de dados foi configurado.');
+      setSubmitting(false);
+      return;
     }
 
     setSubmitting(false);
@@ -356,6 +454,19 @@ export default function ArchetypeForm({ leaderId, leaderName }: ArchetypeFormPro
   if (submitted && results) {
     const sorted = Object.entries(results.percentages)
       .sort(([, a], [, b]) => (b as number) - (a as number));
+
+    const jungianConcepts: Record<string, { layer: string; desc: string }> = {
+      Persona: { layer: 'Persona', desc: 'A máscara social que você apresenta ao mundo. Quem você aprendeu a ser para ser aceita.' },
+      Potencia: { layer: 'Anima / Animus', desc: 'O potencial ainda não vivido. A parte de você que busca expressão e espera sua vez.' },
+      Sombra: { layer: 'Sombra', desc: 'Aquilo que você rejeita em si mesma. Quanto menor a pontuação, mais esse arquétipo foi reprimido.' },
+      Ferido: { layer: 'Complexo Emocional', desc: 'Suas feridas e medos inconscientes. Onde a energia psíquica fica bloqueada.' },
+      Self: { layer: 'Self', desc: 'A totalidade em movimento. Para onde o processo de individuação está te levando.' },
+    };
+
+    const dominantInfo = ARCHETYPE_DESCRIPTIONS[results.dominant.name];
+    const potencyInfo = ARCHETYPE_DESCRIPTIONS[results.potency?.name];
+    const shadowInfo = ARCHETYPE_DESCRIPTIONS[results.shadow?.name];
+    const evoInfo = ARCHETYPE_DESCRIPTIONS[results.evolution.name];
 
     return (
       <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 py-12 px-4">
@@ -375,60 +486,140 @@ export default function ArchetypeForm({ leaderId, leaderName }: ArchetypeFormPro
                 <p className="text-xl font-bold text-slate-800">{leaderName}</p>
               </div>
 
+              <div className="max-w-lg mx-auto p-4 rounded-xl bg-indigo-50 border border-indigo-100 text-sm text-indigo-800">
+                <p className="font-semibold mb-1">Base Junguiana</p>
+                <p className="text-indigo-600 text-xs leading-relaxed">
+                  "Individuação significa tornar-se um ser uno, e na medida em que a individualidade
+                  abrange nossa unicidade mais íntima, tornar-se o próprio Self." — Carl Jung
+                </p>
+                <p className="text-indigo-500 text-xs mt-2">
+                  Este mapeamento integra os arquétipos estruturais de Jung (Persona, Sombra, Anima/Animus, Self)
+                  com a jornada do herói de Joseph Campbell e Carol Pearson.
+                </p>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="p-5 rounded-xl bg-gradient-to-br from-indigo-50 to-purple-50 border border-indigo-100">
-                  <p className="text-xs font-semibold text-indigo-500 uppercase tracking-wider">Arquétipo Dominante</p>
+                  <p className="text-xs font-semibold text-indigo-500 uppercase tracking-wider">{jungianConcepts.Persona.layer}</p>
+                  <p className="text-xs text-indigo-400 mb-1">Arquétipo Dominante</p>
                   <p className="text-2xl font-bold text-indigo-700 mt-1">{results.dominant.name}</p>
+                  <p className="text-[10px] text-indigo-400 mt-1">{dominantInfo?.jung || ''}</p>
                   <div className="mt-2 w-full bg-indigo-200 rounded-full h-2">
                     <div className="bg-indigo-600 h-2 rounded-full" style={{ width: `${results.dominant.score}%` }} />
                   </div>
                   <p className="text-sm text-indigo-500 mt-1">{results.dominant.score}%</p>
+                  <p className="text-xs text-indigo-500/70 mt-2 leading-relaxed">{jungianConcepts.Persona.desc}</p>
                 </div>
 
                 <div className="p-5 rounded-xl bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-100">
-                  <p className="text-xs font-semibold text-amber-500 uppercase tracking-wider">Arquétipo Secundário</p>
-                  <p className="text-2xl font-bold text-amber-700 mt-1">{results.secondary.name}</p>
+                  <p className="text-xs font-semibold text-amber-500 uppercase tracking-wider">{jungianConcepts.Potencia.layer}</p>
+                  <p className="text-xs text-amber-400 mb-1">Arquétipo de Potência</p>
+                  <p className="text-2xl font-bold text-amber-700 mt-1">{results.potency?.name || results.secondary?.name}</p>
+                  <p className="text-[10px] text-amber-400 mt-1">{potencyInfo?.jung || ''}</p>
                   <div className="mt-2 w-full bg-amber-200 rounded-full h-2">
-                    <div className="bg-amber-500 h-2 rounded-full" style={{ width: `${results.secondary.score}%` }} />
+                    <div className="bg-amber-500 h-2 rounded-full" style={{ width: `${results.potency?.score || results.secondary?.score}%` }} />
                   </div>
-                  <p className="text-sm text-amber-500 mt-1">{results.secondary.score}%</p>
+                  <p className="text-sm text-amber-500 mt-1">{results.potency?.score || results.secondary?.score}%</p>
+                  <p className="text-xs text-amber-500/70 mt-2 leading-relaxed">{jungianConcepts.Potencia.desc}</p>
                 </div>
 
-                <div className="p-5 rounded-xl bg-gradient-to-br from-slate-50 to-gray-50 border border-slate-200">
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Arquétipo Sombra</p>
-                  <p className="text-2xl font-bold text-slate-600 mt-1">Sombra</p>
+                <div className="p-5 rounded-xl bg-gradient-to-br from-slate-50 to-red-50 border border-slate-200">
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{jungianConcepts.Sombra.layer}</p>
+                  <p className="text-xs text-slate-400 mb-1">Arquétipo Sombra</p>
+                  <p className="text-2xl font-bold text-slate-600 mt-1">{results.shadow?.name || 'Sombra'}</p>
+                  <p className="text-[10px] text-slate-400 mt-1">{shadowInfo?.jung || 'Conteúdo reprimido'}</p>
                   <div className="mt-2 w-full bg-slate-200 rounded-full h-2">
-                    <div className="bg-slate-400 h-2 rounded-full" style={{ width: `${results.shadow.score}%` }} />
+                    <div className="bg-slate-400 h-2 rounded-full" style={{ width: `${results.shadow?.score || 0}%` }} />
                   </div>
-                  <p className="text-sm text-slate-500 mt-1">{results.shadow.score}%</p>
+                  <p className="text-sm text-slate-500 mt-1">{results.shadow?.score || 0}%</p>
+                  <p className="text-xs text-slate-500/70 mt-2 leading-relaxed">{jungianConcepts.Sombra.desc}</p>
+                </div>
+
+                <div className="p-5 rounded-xl bg-gradient-to-br from-rose-50 to-pink-50 border border-rose-100">
+                  <p className="text-xs font-semibold text-rose-500 uppercase tracking-wider">{jungianConcepts.Ferido.layer}</p>
+                  <p className="text-xs text-rose-400 mb-1">Intensidade da Ferida</p>
+                  <p className="text-2xl font-bold text-rose-700 mt-1">{results.wounded?.score || results.shadowIntensity || 0}%</p>
+                  <div className="mt-2 w-full bg-rose-200 rounded-full h-2">
+                    <div className="bg-rose-400 h-2 rounded-full" style={{ width: `${results.wounded?.score || results.shadowIntensity || 0}%` }} />
+                  </div>
+                  <p className="text-xs text-rose-500/70 mt-2 leading-relaxed">{jungianConcepts.Ferido.desc}</p>
                 </div>
 
                 <div className="p-5 rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100">
-                  <p className="text-xs font-semibold text-emerald-500 uppercase tracking-wider">Arquétipo de Evolução</p>
+                  <p className="text-xs font-semibold text-emerald-500 uppercase tracking-wider">{jungianConcepts.Self.layer}</p>
+                  <p className="text-xs text-emerald-400 mb-1">Arquétipo de Evolução</p>
                   <p className="text-2xl font-bold text-emerald-700 mt-1">{results.evolution.name}</p>
+                  <p className="text-[10px] text-emerald-400 mt-1">{evoInfo?.jung || ''}</p>
                   <div className="mt-2 w-full bg-emerald-200 rounded-full h-2">
                     <div className="bg-emerald-500 h-2 rounded-full" style={{ width: `${results.evolution.score}%` }} />
                   </div>
                   <p className="text-sm text-emerald-500 mt-1">{results.evolution.score}%</p>
+                  <p className="text-xs text-emerald-500/70 mt-2 leading-relaxed">{jungianConcepts.Self.desc}</p>
                 </div>
               </div>
 
               <div className="border-t border-slate-100 pt-6">
-                <h3 className="text-sm font-semibold text-slate-700 mb-3">Perfil Arquetípico Completo</h3>
+                <h3 className="text-sm font-semibold text-slate-700 mb-1">Perfil Arquetípico Completo</h3>
+                <p className="text-xs text-slate-400 mb-3">10 arquétipos de personalidade (Pearson) + conceitos Junguianos</p>
                 <div className="space-y-2">
                   {sorted.map(([name, score]) => {
-                    const info = ARCHETYPE_DESCRIPTIONS[name] || { label: name, color: 'text-slate-600', bg: 'bg-slate-50 border-slate-200' };
+                    const info = (ARCHETYPE_DESCRIPTIONS as any)[name];
+                    const isShadow = name === results.shadow?.name;
+                    const isDominant = name === results.dominant.name;
                     return (
-                      <div key={name} className={`flex items-center gap-3 p-3 rounded-lg border ${info.bg}`}>
-                        <span className={`text-sm font-bold w-24 ${info.color}`}>{info.label}</span>
+                      <div key={name} className={`flex items-center gap-3 p-3 rounded-lg border ${info?.bg || 'bg-slate-50 border-slate-200'}`}>
+                        <span className={`text-sm font-bold w-24 shrink-0 ${info?.color || 'text-slate-600'}`}>{info?.label || name}</span>
                         <div className="flex-1 bg-white/60 rounded-full h-2">
-                          <div className={`h-2 rounded-full ${info.color.replace('text', 'bg')}`}
-                            style={{ width: `${score}%`, opacity: 0.7 }} />
+                          <div className={`h-2 rounded-full ${(info?.color || 'text-slate-600').replace('text', 'bg')}`}
+                            style={{ width: `${score}%`, opacity: isShadow ? 0.4 : 0.7 }} />
                         </div>
                         <span className="text-xs text-slate-500 w-8 text-right">{score}%</span>
+                        {isDominant && <span className="text-[10px] font-bold text-indigo-500 bg-indigo-50 px-1.5 py-0.5 rounded">Persona</span>}
+                        {isShadow && <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">Sombra</span>}
+                        {name === results.evolution.name && !isDominant && <span className="text-[10px] font-bold text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded">Self</span>}
                       </div>
                     );
                   })}
+                </div>
+              </div>
+
+              <div className="border-t border-slate-100 pt-6">
+                <h3 className="text-sm font-semibold text-slate-700 mb-3">Interpretação Junguiana</h3>
+                <div className="space-y-3 text-sm text-slate-600 leading-relaxed">
+                  <div className="p-4 rounded-xl bg-indigo-50 border border-indigo-100">
+                    <p className="font-semibold text-indigo-700 mb-1">🎭 Persona: {results.dominant.name}</p>
+                    <p>{dominantInfo?.luz}</p>
+                    <p className="text-indigo-600 mt-2 italic">"{dominantInfo?.mensagem}"</p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-amber-50 border border-amber-100">
+                    <p className="font-semibold text-amber-700 mb-1">🌱 Potência: {results.potency?.name || results.secondary?.name}</p>
+                    <p>{potencyInfo?.luz}</p>
+                    <p className="text-amber-600 mt-2 italic">"{potencyInfo?.mensagem}"</p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
+                    <p className="font-semibold text-slate-700 mb-1">🌑 Sombra: {results.shadow?.name}</p>
+                    <p className="text-slate-600">{shadowInfo?.sombra || 'Padrão inconsciente que pode estar sendo projetado nos outros.'}</p>
+                    <p className="text-slate-500 mt-2 text-xs">
+                      Quanto menor a pontuação, mais esse arquétipo foi reprimido. A sombra não é ruim — é energia vital
+                      que precisa ser integrada.
+                    </p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-rose-50 border border-rose-100">
+                    <p className="font-semibold text-rose-700 mb-1">🩹 Ferida: {results.wounded?.score || results.shadowIntensity || 0}% de intensidade</p>
+                    <p className="text-rose-600 text-xs">
+                      Medo de fracasso, necessidade de aprovação, evitação de conflitos — essas são as vozes do
+                      Complexo. O primeiro passo para curar é nomear.
+                    </p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-100">
+                    <p className="font-semibold text-emerald-700 mb-1">✨ Self / Individuação: {results.evolution.name}</p>
+                    <p className="text-emerald-600">{evoInfo?.luz}</p>
+                    <p className="text-emerald-600 mt-2 italic">"{evoInfo?.mensagem}"</p>
+                    <p className="text-emerald-500 text-xs mt-2">
+                      O arquétipo de evolução representa o próximo passo da sua jornada de individuação.
+                      Não é sobre ser perfeita — é sobre ser completa.
+                    </p>
+                  </div>
                 </div>
               </div>
 
@@ -583,6 +774,14 @@ export default function ArchetypeForm({ leaderId, leaderName }: ArchetypeFormPro
             ))}
           </div>
 
+          {submitError && (
+            <div className="px-8">
+              <div className="p-4 bg-red-50 text-red-700 rounded-xl text-sm border border-red-200 flex items-start gap-2">
+                <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
+                {submitError}
+              </div>
+            </div>
+          )}
           <div className="px-8 pb-8 flex items-center justify-between">
             <button type="button" onClick={goPrev} disabled={currentStep === 0}
               className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
