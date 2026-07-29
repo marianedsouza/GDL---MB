@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { Plus, Trash2, Link as LinkIcon, Users, ExternalLink, Download, Share2, Copy, Check } from 'lucide-react';
+import { Plus, Trash2, Link as LinkIcon, Users, ExternalLink, Download, Share2, Copy, Check, Brain, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import AdminLayout from '../components/AdminLayout';
 
@@ -9,6 +9,7 @@ interface Leader {
   name: string;
   phone: string;
   leadsCount: number;
+  archetypeCompleted?: boolean;
 }
 
 export default function Dashboard() {
@@ -364,9 +365,30 @@ export default function Dashboard() {
                     </a>
                   </div>
                   
-                  <div className="inline-flex items-center px-3 py-1 bg-indigo-50 text-indigo-700 text-sm font-medium rounded-full">
-                    {leader.leadsCount} {leader.leadsCount === 1 ? 'Contato' : 'Contatos'}
+                  <div className="flex items-center gap-2 flex-wrap mt-2">
+                    <span className="inline-flex items-center px-3 py-1 bg-indigo-50 text-indigo-700 text-sm font-medium rounded-full">
+                      {leader.leadsCount} {leader.leadsCount === 1 ? 'Contato' : 'Contatos'}
+                    </span>
+                    {leader.archetypeCompleted ? (
+                      <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-50 text-green-700 text-sm font-medium rounded-full">
+                        <Brain className="w-3.5 h-3.5" /> Arquétipo OK
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-3 py-1 bg-amber-50 text-amber-700 text-sm font-medium rounded-full">
+                        <AlertCircle className="w-3.5 h-3.5" /> Arquétipo Pendente
+                      </span>
+                    )}
                   </div>
+                  {!leader.archetypeCompleted && (
+                    <a
+                      href={`/arquetipo/${leader._id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-indigo-600 hover:text-indigo-700 hover:underline"
+                    >
+                      <Brain className="w-3.5 h-3.5" /> Link para Mapeamento Arquetípico
+                    </a>
+                  )}
                 </div>
               </div>
             </div>

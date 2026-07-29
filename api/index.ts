@@ -49,7 +49,12 @@ app.get('/api/leaders', authMiddleware, async (req, res) => {
           .from('leads')
           .select('*', { count: 'exact', head: true })
           .eq('leader_id', leader.id);
-        return { ...leader, _id: leader.id, leadsCount: count || 0 };
+        const { data: archetype } = await supabase
+          .from('archetype_responses')
+          .select('id')
+          .eq('leader_id', leader.id)
+          .maybeSingle();
+        return { ...leader, _id: leader.id, leadsCount: count || 0, archetypeCompleted: !!archetype };
       })
     );
     res.json(leadersWithCount);
@@ -268,6 +273,63 @@ app.post('/api/public/archetype', async (req, res) => {
   } catch (err: any) {
     console.error(err);
     res.status(500).json({ error: 'Erro ao salvar mapeamento', details: err.message });
+  }
+});
+
+// Public: Get full archetype mapping for a leader
+app.get('/api/public/archetype/:leaderId', async (req, res) => {
+  try {
+    const { leaderId } = req.params;
+    const { data, error } = await supabase
+      .from('archetype_responses')
+      .select('*')
+      .eq('leader_id', leaderId)
+      .maybeSingle();
+    if (error) throw error;
+    if (!data) return res.status(404).json({ error: 'Mapeamento não encontrado' });
+    res.json(data);
+  } catch (err: any) {
+    res.status(500).json({ error: 'Erro ao buscar mapeamento', details: err.message });
+  }
+});
+
+// Admin: Get all archetype profiles with leader info
+app.get('/api/archetype/profiles', authMiddleware, async (req, res) => {
+  try {
+    const { data: archetypes, error } = await supabase
+      .from('archetype_responses')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+
+    const profiles = await Promise.all((archetypes || []).map(async (a) => {
+      const { data: leader } = await supabase
+        .from('leaders')
+        .select('full_name, name, phone, email, cpf')
+        .eq('id', a.leader_id)
+        .single();
+      return { ...a, leader: leader || null };
+    }));
+
+    res.json(profiles);
+  } catch (err: any) {
+    res.status(500).json({ error: 'Erro ao buscar perfis', details: err.message });
+  }
+});
+
+// Public: Check if leader completed archetype mapping
+app.get('/api/public/archetype/check/:leaderId', async (req, res) => {
+  try {
+    const { leaderId } = req.params;
+    const { data, error } = await supabase
+      .from('archetype_responses')
+      .select('id, created_at')
+      .eq('leader_id', leaderId)
+      .maybeSingle();
+    if (error) throw error;
+    res.json({ completed: !!data, submittedAt: data?.created_at || null });
+  } catch (err: any) {
+    res.status(500).json({ error: 'Erro ao verificar mapeamento', details: err.message });
   }
 });
 

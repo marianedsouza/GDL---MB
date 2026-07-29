@@ -4,6 +4,8 @@ import Dashboard from './pages/Dashboard';
 import PublicForm from './pages/PublicForm';
 import LeadsList from './pages/LeadsList';
 import CadastroLideranca from './pages/CadastroLideranca';
+import ArchetypeAccess from './pages/ArchetypeAccess';
+import ArchetypeProfiles from './pages/ArchetypeProfiles';
 import { useEffect, useState, ReactNode } from 'react';
 
 const ProtectedRoute = ({ children }: { children: ReactNode }) => {
@@ -20,6 +22,7 @@ export default function App() {
       <Routes>
         {/* Public Form Route */}
         <Route path="/cadastro" element={<CadastroLideranca />} />
+        <Route path="/arquetipo/:leaderId" element={<ArchetypeAccess />} />
         <Route path="/form/:leaderId" element={<PublicForm />} />
 
         {/* Admin Routes */}
@@ -29,6 +32,7 @@ export default function App() {
           <ProtectedRoute>
             <Routes>
               <Route path="dashboard" element={<Dashboard />} />
+              <Route path="arquetipos" element={<ArchetypeProfiles />} />
               <Route path="leads" element={<LeadsList />} />
               <Route path="leads/:leaderId" element={<LeadsList />} />
               <Route path="*" element={<Navigate to="dashboard" replace />} />

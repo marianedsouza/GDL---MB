@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { User, Phone, Mail, MapPin, Briefcase, CheckCircle2, Brain } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { User, Phone, Mail, MapPin, Briefcase, CheckCircle2, Brain, AlertCircle, Loader2, ExternalLink, Copy, Check } from 'lucide-react';
 import ArchetypeForm from '../components/ArchetypeForm';
 
 export default function CadastroLideranca() {
@@ -32,6 +33,9 @@ export default function CadastroLideranca() {
     commitmentAgreed: false
   });
 
+  const [searchParams] = useSearchParams();
+  const urlLeaderId = searchParams.get('leaderId');
+
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [submittedLeaderId, setSubmittedLeaderId] = useState('');
@@ -39,6 +43,14 @@ export default function CadastroLideranca() {
   const [error, setError] = useState('');
   const [cepError, setCepError] = useState('');
   const [loadingCep, setLoadingCep] = useState(false);
+  const [completionState, setCompletionState] = useState<{
+    loading: boolean;
+    leaderId: string;
+    leaderName: string;
+    archetypeCompleted: boolean;
+    error: string;
+  } | null>(null);
+  const [copiedUrl, setCopiedUrl] = useState(false);
 
   
   const handleCepChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -70,6 +82,35 @@ export default function CadastroLideranca() {
       }
     } else {
       setCepError('');
+    }
+  };
+
+  useEffect(() => {
+    if (urlLeaderId) {
+      checkArchetypeCompletion(urlLeaderId);
+    }
+  }, [urlLeaderId]);
+
+  const checkArchetypeCompletion = async (leaderId: string) => {
+    setCompletionState({ loading: true, leaderId, leaderName: '', archetypeCompleted: false, error: '' });
+    try {
+      const leaderRes = await fetch(`/api/public/leaders/${leaderId}`);
+      if (!leaderRes.ok) {
+        setCompletionState(prev => prev ? { ...prev, loading: false, error: 'Líder não encontrado.' } : null);
+        return;
+      }
+      const leaderData = await leaderRes.json();
+      const checkRes = await fetch(`/api/public/archetype/check/${leaderId}`);
+      const checkData = await checkRes.json();
+      setCompletionState({
+        loading: false,
+        leaderId,
+        leaderName: leaderData.name,
+        archetypeCompleted: checkData.completed,
+        error: '',
+      });
+    } catch {
+      setCompletionState(prev => prev ? { ...prev, loading: false, error: 'Erro ao verificar cadastro.' } : null);
     }
   };
 
@@ -126,7 +167,73 @@ export default function CadastroLideranca() {
   };
 
   if (showArchetype) {
-    return <ArchetypeForm leaderId={submittedLeaderId} leaderName={formData.name} />;
+    const lid = completionState ? completionState.leaderId : submittedLeaderId;
+    const lname = completionState ? completionState.leaderName : formData.name;
+    return <ArchetypeForm leaderId={lid} leaderName={lname} />;
+  }
+
+  if (completionState) {
+    if (completionState.loading) {
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 flex items-center justify-center p-4">
+          <div className="bg-white p-8 rounded-2xl shadow-sm text-center border border-slate-200">
+            <Loader2 className="h-10 w-10 text-indigo-600 animate-spin mx-auto mb-4" />
+            <p className="text-slate-600">Verificando cadastro...</p>
+          </div>
+        </div>
+      );
+    }
+    if (completionState.error) {
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 flex flex-col items-center justify-center p-4">
+          <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-sm text-center border border-slate-200">
+            <AlertCircle className="h-10 w-10 text-red-500 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-slate-800 mb-2">Erro</h2>
+            <p className="text-slate-600 mb-6">{completionState.error}</p>
+            <a href="/cadastro" className="text-indigo-600 hover:text-indigo-700 font-medium">
+              Voltar ao cadastro
+            </a>
+          </div>
+        </div>
+      );
+    }
+    if (completionState.archetypeCompleted) {
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-green-50 to-indigo-50 flex flex-col items-center justify-center p-4">
+          <div className="max-w-lg w-full bg-white p-8 rounded-2xl shadow-sm text-center border border-slate-200">
+            <CheckCircle2 className="h-12 w-12 text-green-500 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-slate-800 mb-2">Cadastro Completo!</h2>
+            <p className="text-slate-600 mb-2">
+              Parabéns, <strong>{completionState.leaderName}</strong>!
+            </p>
+            <p className="text-slate-500 text-sm">
+              Você já concluiu o cadastro e o mapeamento arquetípico.
+            </p>
+          </div>
+        </div>
+      );
+    }
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 flex flex-col items-center justify-center p-4">
+        <div className="max-w-lg w-full bg-white p-8 rounded-2xl shadow-sm text-center border border-slate-200">
+          <Brain className="h-12 w-12 text-indigo-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-slate-800 mb-2">Quase lá!</h2>
+          <p className="text-slate-600 mb-2">
+            Olá, <strong>{completionState.leaderName}</strong>!
+          </p>
+          <p className="text-slate-500 text-sm mb-8">
+            Para finalizar seu cadastro, complete o Mapeamento Arquetípico.
+            É rápido e vai te ajudar a descobrir seu perfil de liderança.
+          </p>
+          <button
+            onClick={() => setShowArchetype(true)}
+            className="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all shadow-md mx-auto"
+          >
+            <Brain className="w-5 h-5" /> Fazer Mapeamento Arquetípico
+          </button>
+        </div>
+      </div>
+    );
   }
 
   if (success) {
@@ -140,7 +247,7 @@ export default function CadastroLideranca() {
           <p className="text-slate-600 mb-2">
             Obrigado por se juntar à Equipe MB, <strong>{formData.name}</strong>.
           </p>
-          <p className="text-slate-500 text-sm mb-8">
+          <p className="text-slate-500 text-sm mb-6">
             Agora você pode fazer o Mapeamento Arquetípico para descobrir seu perfil.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -156,6 +263,37 @@ export default function CadastroLideranca() {
             >
               Fazer novo cadastro
             </button>
+          </div>
+          <div className="mt-6 p-4 bg-slate-50 rounded-xl border border-slate-200 text-left">
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Guarde este link para continuar depois</p>
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                readOnly
+                value={`${window.location.origin}/cadastro?leaderId=${submittedLeaderId}`}
+                className="text-xs w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-600 truncate outline-none"
+              />
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(`${window.location.origin}/cadastro?leaderId=${submittedLeaderId}`);
+                  setCopiedUrl(true);
+                  setTimeout(() => setCopiedUrl(false), 2000);
+                }}
+                className={`p-2 border rounded-lg transition-colors shrink-0 ${
+                  copiedUrl
+                    ? 'text-green-600 bg-green-50 border-green-200'
+                    : 'text-slate-400 hover:text-slate-600 bg-white border-slate-200'
+                }`}
+              >
+                {copiedUrl ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+              </button>
+              <a
+                href={`/cadastro?leaderId=${submittedLeaderId}`}
+                className="p-2 text-slate-400 hover:text-slate-600 bg-white border border-slate-200 rounded-lg transition-colors shrink-0"
+              >
+                <ExternalLink className="w-4 h-4" />
+              </a>
+            </div>
           </div>
         </div>
       </div>
