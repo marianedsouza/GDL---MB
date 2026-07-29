@@ -35,310 +35,281 @@ function getInfo(name: string) {
   return ARCHETYPE_INFO[name] || { label: name, color: '#64748b', jung: '', luz: '', sombra: '', mensagem: '' };
 }
 
-function drawBar(doc: jsPDF, x: number, y: number, w: number, percent: number, color: string) {
-  doc.setFillColor('#e2e8f0');
-  doc.roundedRect(x, y, w, 5, 2, 2, 'F');
-  if (percent > 0) {
-    doc.setFillColor(color);
-    doc.roundedRect(x, y, w * (percent / 100), 5, 2, 2, 'F');
-  }
-}
-
-function addArchetypeCard(
-  doc: jsPDF,
-  x: number,
-  y: number,
-  w: number,
-  title: string,
-  subtitle: string,
-  archetypeName: string,
-  score: number,
-  jungText: string,
-  detail: string,
-  message: string
-) {
-  const info = getInfo(archetypeName);
-  const color = info.color;
-
-  doc.setFillColor('#f8fafc');
-  doc.setDrawColor('#e2e8f0');
-  doc.roundedRect(x, y, w, 58, 4, 4, 'FD');
-
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(7);
-  doc.setTextColor('#94a3b8');
-  doc.text(title, x + 6, y + 7);
-
-  doc.setFontSize(6);
-  doc.setTextColor('#64748b');
-  doc.text(subtitle, x + 6, y + 12);
-
-  doc.setFontSize(11);
-  doc.setTextColor(color);
-  doc.text(archetypeName || '-', x + 6, y + 22);
-
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(7);
-  doc.setTextColor('#94a3b8');
-  doc.text(jungText, x + 6, y + 28);
-
-  drawBar(doc, x + 6, y + 31, w - 12, score, color);
-
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(9);
-  doc.setTextColor(color);
-  doc.text(`${score}%`, x + 6, y + 41);
-
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(6.5);
-  doc.setTextColor('#64748b');
-
-  const lines = doc.splitTextToSize(detail, w - 12);
-  const maxLines = 2;
-  const showLines = lines.slice(0, maxLines);
-  doc.text(showLines, x + 6, y + 47);
-
-  if (message) {
-    doc.setFont('helvetica', 'italic');
-    doc.setFontSize(6);
-    doc.setTextColor('#475569');
-    const msgLines = doc.splitTextToSize(`"${message}"`, w - 12);
-    const startY = 47 + showLines.length * 3.5;
-    if (startY + msgLines.length * 3 <= y + 58) {
-      doc.text(msgLines.slice(0, 1), x + 6, startY);
-    }
-  }
-}
+const PAGE_W = 210;
+const PAGE_H = 297;
+const MARGIN = 15;
+const CONTENT_W = PAGE_W - 2 * MARGIN;
 
 export function generateArchetypeReport(profiles: ArchetypeProfile[]) {
   const doc = new jsPDF('p', 'mm', 'a4');
-  const pageW = 210;
-  const pageH = 297;
-  const margin = 15;
-  const contentW = pageW - 2 * margin;
-  let y = margin;
+  let y = MARGIN;
 
-  const addHeader = () => {
+  function header() {
     doc.setFillColor('#4f46e5');
-    doc.rect(0, 0, pageW, 12, 'F');
+    doc.rect(0, 0, PAGE_W, 12, 'F');
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(8);
     doc.setTextColor('#ffffff');
-    doc.text('RELATÓRIO DE ESTUDO ARQUETÍPICO', pageW / 2, 8, { align: 'center' });
-  };
+    doc.text('RELATÓRIO DE ESTUDO ARQUETÍPICO', PAGE_W / 2, 8, { align: 'center' });
+  }
 
-  const addFooter = () => {
-    const footerY = pageH - 8;
+  function footer() {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(7);
     doc.setTextColor('#cbd5e1');
     doc.text(
       `Gerado em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`,
-      pageW / 2,
-      footerY,
-      { align: 'center' }
+      PAGE_W / 2, PAGE_H - 8, { align: 'center' }
     );
-  };
+  }
 
-  const addPage = () => {
+  function newPage() {
     doc.addPage();
-    y = margin;
-    addHeader();
-    addFooter();
-  };
+    y = MARGIN;
+    header();
+    footer();
+  }
 
-  // First page header
-  addHeader();
-  addFooter();
+  function checkPage(needed: number) {
+    if (y + needed > PAGE_H - 15) {
+      newPage();
+    }
+  }
 
-  // Title
+  header();
+  footer();
+
+  // --- Cover ---
   y += 10;
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(20);
   doc.setTextColor('#1e293b');
-  doc.text('Relatório de Estudo Arquetípico', pageW / 2, y, { align: 'center' });
+  doc.text('Relatório de Estudo Arquetípico', PAGE_W / 2, y, { align: 'center' });
   y += 8;
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
   doc.setTextColor('#64748b');
-  const dateStr = `Data: ${new Date().toLocaleDateString('pt-BR')}`;
-  doc.text(dateStr, pageW / 2, y, { align: 'center' });
+  doc.text(`Data: ${new Date().toLocaleDateString('pt-BR')}`, PAGE_W / 2, y, { align: 'center' });
   y += 6;
 
-  doc.text(`${profiles.length} liderança(s) selecionada(s)`, pageW / 2, y, { align: 'center' });
+  doc.text(`${profiles.length} liderança(s) selecionada(s)`, PAGE_W / 2, y, { align: 'center' });
   y += 6;
 
   doc.setDrawColor('#e2e8f0');
-  doc.line(margin, y, pageW - margin, y);
+  doc.line(MARGIN, y, PAGE_W - MARGIN, y);
   y += 8;
 
-  // List of leaders
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(10);
   doc.setTextColor('#1e293b');
-  doc.text('Lideranças neste relatório:', margin, y);
+  doc.text('Lideranças neste relatório:', MARGIN, y);
   y += 5;
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8);
   doc.setTextColor('#475569');
   for (const p of profiles) {
-    const name = p.leader?.name || p.leader_name || 'Desconhecido';
-    doc.text(`- ${name}`, margin + 3, y);
+    checkPage(4);
+    doc.text(`- ${p.leader?.name || p.leader_name || 'Desconhecido'}`, MARGIN + 3, y);
     y += 4;
-    if (y > pageH - 25) {
-      addPage();
-    }
   }
 
-  // Process each profile
+  // --- Profile sections ---
   for (const profile of profiles) {
-    if (y > pageH - 50) {
-      addPage();
-    } else {
-      y += 6;
-    }
+    checkPage(20);
 
     const displayName = profile.leader?.name || profile.leader_name || 'Desconhecido';
     const contactInfo = profile.leader?.phone || profile.leader?.email || '';
 
     // Profile header
     doc.setFillColor('#f1f5f9');
-    doc.roundedRect(margin, y, contentW, 14, 3, 3, 'F');
+    doc.roundedRect(MARGIN, y, CONTENT_W, 12, 3, 3, 'F');
 
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(13);
+    doc.setFontSize(12);
     doc.setTextColor('#1e293b');
-    doc.text(displayName, margin + 6, y + 9);
+    doc.text(displayName, MARGIN + 6, y + 8);
 
     if (contactInfo) {
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(8);
       doc.setTextColor('#64748b');
-      doc.text(contactInfo, margin + contentW - 6, y + 9, { align: 'right' });
+      doc.text(contactInfo, MARGIN + CONTENT_W - 6, y + 8, { align: 'right' });
     }
 
-    y += 20;
+    y += 18;
 
-    // Archetype cards grid (2 rows x 5 cols, or 3+2)
-    const cardW = (contentW - 12) / 3;
-    const cardH = 58;
+    // --- 3 archetype cards side by side ---
+    checkPage(50);
 
-    const cards = [
-      { title: 'PERSONA', subtitle: 'DOMINANTE', name: profile.dominant?.name || '-', score: profile.dominant?.score || 0, jung: getInfo(profile.dominant?.name || '').jung, detail: getInfo(profile.dominant?.name || '').luz, msg: getInfo(profile.dominant?.name || '').mensagem },
-      { title: 'ANIMA/ANIMUS', subtitle: 'POTÊNCIA', name: profile.potency?.name || profile.secondary?.name || '-', score: profile.potency?.score || profile.secondary?.score || 0, jung: getInfo(profile.potency?.name || profile.secondary?.name || '').jung, detail: getInfo(profile.potency?.name || profile.secondary?.name || '').luz, msg: getInfo(profile.potency?.name || profile.secondary?.name || '').mensagem },
-      { title: 'SOMBRA', subtitle: 'ARQUÉTIPO REPRIMIDO', name: profile.shadow?.name || 'Sombra', score: profile.shadow?.score || 0, jung: getInfo(profile.shadow?.name || '').jung || 'Inconsciente Pessoal', detail: getInfo(profile.shadow?.name || '').sombra || 'Conteúdo reprimido', msg: getInfo(profile.shadow?.name || '').mensagem },
-    ];
+    const cardW = (CONTENT_W - 12) / 3;
 
-    for (let i = 0; i < cards.length; i++) {
-      const cx = margin + i * (cardW + 6);
-      addArchetypeCard(doc, cx, y, cardW, cards[i].title, cards[i].subtitle, cards[i].name, cards[i].score, cards[i].jung, cards[i].detail, cards[i].msg);
-    }
-
-    y += cardH + 4;
-
-    const card2W = (contentW - 6) / 2;
-    const cards2 = [
-      { title: 'COMPLEXO', subtitle: 'FERIDA / SOMBRA', name: `${profile.wounded?.score || profile.shadowIntensity || 0}%`, score: profile.wounded?.score || profile.shadowIntensity || 0, jung: '', detail: 'Medo de fracasso, necessidade de aprovação, evitação de conflitos', msg: '' },
-      { title: 'SELF', subtitle: 'EVOLUÇÃO', name: profile.evolution?.name || '-', score: profile.evolution?.score || 0, jung: getInfo(profile.evolution?.name || '').jung, detail: getInfo(profile.evolution?.name || '').luz, msg: getInfo(profile.evolution?.name || '').mensagem },
-    ];
-
-    for (let i = 0; i < cards2.length; i++) {
-      const cx = margin + i * (card2W + 6);
-      const info = cards2[i];
-      const color = info.name.includes('%') ? '#e11d48' : getInfo(info.name).color;
-      const displayScore = info.name.includes('%') ? 0 : info.score;
-
+    function drawSmallCard(cx: number, color: string, title: string, sub: string, name: string, pct: number, jung: string, detail: string, msg: string) {
       doc.setFillColor('#f8fafc');
       doc.setDrawColor('#e2e8f0');
-      doc.roundedRect(cx, y, card2W, 48, 4, 4, 'FD');
+      doc.roundedRect(cx, y, cardW, 46, 3, 3, 'FD');
 
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(7);
+      doc.setFontSize(6.5);
       doc.setTextColor('#94a3b8');
-      doc.text(info.title, cx + 6, y + 7);
-
-      doc.setFontSize(6);
+      doc.text(title, cx + 4, y + 6);
+      doc.setFontSize(5.5);
       doc.setTextColor('#64748b');
-      doc.text(info.subtitle, cx + 6, y + 12);
+      doc.text(sub, cx + 4, y + 10);
 
-      if (info.name.includes('%')) {
-        doc.setFontSize(16);
-        doc.setTextColor(color);
-        doc.text(info.name, cx + 6, y + 26);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.setTextColor(color);
+      doc.text(name, cx + 4, y + 18);
 
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(6.5);
-        doc.setTextColor('#64748b');
-        const detLines = doc.splitTextToSize(info.detail, card2W - 12);
-        doc.text(detLines.slice(0, 3), cx + 6, y + 34);
-      } else {
-        doc.setFontSize(11);
-        doc.setTextColor(color);
-        doc.text(info.name, cx + 6, y + 22);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(6);
+      doc.setTextColor('#94a3b8');
+      doc.text(jung, cx + 4, y + 23);
 
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(7);
-        doc.setTextColor('#94a3b8');
-        doc.text(info.jung, cx + 6, y + 28);
-
-        drawBar(doc, cx + 6, y + 31, card2W - 12, displayScore, color);
-
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(9);
-        doc.setTextColor(color);
-        doc.text(`${displayScore}%`, cx + 6, y + 41);
+      // Bar
+      doc.setFillColor('#e2e8f0');
+      doc.roundedRect(cx + 4, y + 26, cardW - 8, 4, 2, 2, 'F');
+      if (pct > 0) {
+        doc.setFillColor(color);
+        doc.roundedRect(cx + 4, y + 26, (cardW - 8) * (pct / 100), 4, 2, 2, 'F');
       }
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8);
+      doc.setTextColor(color);
+      doc.text(`${pct}%`, cx + 4, y + 34);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(5.5);
+      doc.setTextColor('#64748b');
+      const dLines = doc.splitTextToSize(detail, cardW - 8);
+      doc.text(dLines.slice(0, 2), cx + 4, y + 39);
     }
 
-    y += 56;
+    const cards = [
+      { c: '#4f46e5', t: 'PERSONA', s: 'DOMINANTE', n: profile.dominant?.name || '-', p: profile.dominant?.score || 0 },
+      { c: '#d97706', t: 'ANIMA/ANIMUS', s: 'POTÊNCIA', n: profile.potency?.name || profile.secondary?.name || '-', p: profile.potency?.score || profile.secondary?.score || 0 },
+      { c: '#64748b', t: 'SOMBRA', s: 'ARQUÉTIPO REPRIMIDO', n: profile.shadow?.name || 'Sombra', p: profile.shadow?.score || 0 },
+    ];
 
-    // Full archetype profile
-    if (y > pageH - 45) {
-      addPage();
+    for (let i = 0; i < 3; i++) {
+      const info = getInfo(cards[i].n);
+      drawSmallCard(
+        MARGIN + i * (cardW + 6),
+        cards[i].c,
+        cards[i].t, cards[i].s,
+        cards[i].n, cards[i].p,
+        info.jung || (cards[i].t === 'SOMBRA' ? 'Inconsciente Pessoal' : ''),
+        cards[i].t === 'SOMBRA' ? info.sombra || 'Conteúdo reprimido' : info.luz,
+        info.mensagem
+      );
     }
+
+    y += 50;
+
+    // --- 2 bottom cards ---
+    checkPage(40);
+
+    const card2W = (CONTENT_W - 6) / 2;
+
+    // Complexo card
+    const wScore = profile.wounded?.score ?? profile.shadowIntensity ?? 0;
+    doc.setFillColor('#f8fafc');
+    doc.setDrawColor('#e2e8f0');
+    doc.roundedRect(MARGIN, y, card2W, 36, 3, 3, 'FD');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(6.5);
+    doc.setTextColor('#94a3b8');
+    doc.text('COMPLEXO', MARGIN + 4, y + 6);
+    doc.setFontSize(5.5);
+    doc.setTextColor('#64748b');
+    doc.text('FERIDA / SOMBRA', MARGIN + 4, y + 10);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(14);
+    doc.setTextColor('#e11d48');
+    doc.text(`${wScore}%`, MARGIN + 4, y + 22);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(5.5);
+    doc.setTextColor('#64748b');
+    doc.text('Medo de fracasso, necessidade de aprovação, evitação de conflitos', MARGIN + 4, y + 29);
+
+    // Evolution card
+    const evoInfo = getInfo(profile.evolution?.name || '');
+    const evoX = MARGIN + card2W + 6;
+    doc.setFillColor('#f8fafc');
+    doc.setDrawColor('#e2e8f0');
+    doc.roundedRect(evoX, y, card2W, 36, 3, 3, 'FD');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(6.5);
+    doc.setTextColor('#94a3b8');
+    doc.text('SELF', evoX + 4, y + 6);
+    doc.setFontSize(5.5);
+    doc.setTextColor('#64748b');
+    doc.text('EVOLUÇÃO', evoX + 4, y + 10);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.setTextColor('#059669');
+    doc.text(profile.evolution?.name || '-', evoX + 4, y + 18);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(6);
+    doc.setTextColor('#94a3b8');
+    doc.text(evoInfo.jung, evoX + 4, y + 23);
+
+    // Bar
+    doc.setFillColor('#e2e8f0');
+    doc.roundedRect(evoX + 4, y + 26, card2W - 8, 4, 2, 2, 'F');
+    if ((profile.evolution?.score || 0) > 0) {
+      doc.setFillColor('#059669');
+      doc.roundedRect(evoX + 4, y + 26, (card2W - 8) * ((profile.evolution?.score || 0) / 100), 4, 2, 2, 'F');
+    }
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.setTextColor('#059669');
+    doc.text(`${profile.evolution?.score || 0}%`, evoX + 4, y + 34);
+
+    y += 42;
+
+    // --- Full archetype profile table ---
+    checkPage(85);
 
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(10);
     doc.setTextColor('#1e293b');
-    doc.text('Perfil Arquetípico Completo', margin, y);
+    doc.text('Perfil Arquetípico Completo', MARGIN, y);
     y += 4;
 
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(7);
+    doc.setFontSize(6.5);
     doc.setTextColor('#94a3b8');
-    doc.text('10 arquétipos de personalidade (Pearson) + conceitos Junguianos', margin, y);
-    y += 5;
+    doc.text('10 arquétipos de personalidade (Pearson) + conceitos Junguianos', MARGIN, y);
+    y += 4;
 
     const sorted = Object.entries(profile.percentages || {}).sort(([, a], [, b]) => (b as number) - (a as number));
 
     // Table header
-    const tableW = contentW;
-    const colW = [28, tableW - 50, 22];
-    const rowH = 5.5;
+    const colW = [26, CONTENT_W - 54, 28];
+    const rh = 5;
 
     doc.setFillColor('#f1f5f9');
-    doc.rect(margin, y, tableW, rowH, 'F');
+    doc.rect(MARGIN, y, CONTENT_W, rh, 'F');
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(7);
+    doc.setFontSize(6.5);
     doc.setTextColor('#475569');
-    doc.text('Arquétipo', margin + 3, y + 3.8);
-    doc.text('Percentual', margin + colW[0] + 3, y + 3.8);
-    doc.text('Função', margin + colW[0] + colW[1] + 3, y + 3.8);
-    y += rowH;
+    doc.text('Arquétipo', MARGIN + 3, y + 3.5);
+    doc.text('Percentual', MARGIN + colW[0] + 3, y + 3.5);
+    doc.text('Função', MARGIN + colW[0] + colW[1] + 3, y + 3.5);
+    y += rh;
 
-    const isDominant = (name: string) => name === profile.dominant?.name;
-    const isShadow = (name: string) => name === profile.shadow?.name;
-    const isEvolution = (name: string) => name === profile.evolution?.name && !isDominant(name);
+    const isDominant = (n: string) => n === profile.dominant?.name;
+    const isShadow = (n: string) => n === profile.shadow?.name;
+    const isEvolution = (n: string) => n === profile.evolution?.name && !isDominant(n);
 
     for (const [name, score] of sorted) {
-      if (y > pageH - 15) {
-        addPage();
-      }
+      checkPage(rh + 1);
 
       const info = getInfo(name);
-      const label = info.label;
       const pct = score as number;
 
       let role = '';
@@ -348,86 +319,87 @@ export function generateArchetypeReport(profiles: ArchetypeProfile[]) {
 
       doc.setFillColor('#ffffff');
       doc.setDrawColor('#e2e8f0');
-      doc.rect(margin, y, tableW, rowH, 'FD');
+      doc.rect(MARGIN, y, CONTENT_W, rh, 'FD');
 
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(7);
+      doc.setFontSize(6.5);
       doc.setTextColor(info.color);
-      doc.text(label, margin + 3, y + 3.8);
+      doc.text(info.label, MARGIN + 3, y + 3.5);
 
-      drawBar(doc, margin + colW[0], y + 1.5, colW[1], pct, info.color);
+      // Bar
+      doc.setFillColor('#e2e8f0');
+      doc.roundedRect(MARGIN + colW[0], y + 1, colW[1], 3, 1.5, 1.5, 'F');
+      if (pct > 0) {
+        doc.setFillColor(info.color);
+        doc.roundedRect(MARGIN + colW[0], y + 1, colW[1] * (pct / 100), 3, 1.5, 1.5, 'F');
+      }
 
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(7);
+      doc.setFontSize(6.5);
       doc.setTextColor('#64748b');
-      doc.text(`${pct}%`, margin + colW[0] + colW[1] + 3, y + 3.8);
+      doc.text(`${pct}%`, MARGIN + colW[0] + colW[1] + 3, y + 3.5);
 
       if (role) {
         doc.setFont('helvetica', 'bold');
-        doc.setFontSize(6);
-        const roleColors: Record<string, string> = { Persona: '#6366f1', Sombra: '#64748b', Self: '#059669' };
-        doc.setTextColor(roleColors[role] || '#64748b');
-        doc.text(role, margin + colW[0] + colW[1] + 14, y + 3.8);
+        doc.setFontSize(5.5);
+        const roleC: Record<string, string> = { Persona: '#6366f1', Sombra: '#64748b', Self: '#059669' };
+        doc.setTextColor(roleC[role] || '#64748b');
+        doc.text(role, MARGIN + colW[0] + colW[1] + 20, y + 3.5);
       }
 
-      y += rowH;
+      y += rh;
     }
 
-    // Jungian interpretation
-    y += 6;
-    if (y > pageH - 30) {
-      addPage();
-    }
+    // --- Jungian interpretation ---
+    y += 4;
+    checkPage(70);
 
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(10);
     doc.setTextColor('#1e293b');
-    doc.text('Interpretação Junguiana', margin, y);
-    y += 6;
+    doc.text('Interpretação Junguiana', MARGIN, y);
+    y += 5;
 
     const interpretations = [
-      { label: `Persona: ${profile.dominant?.name}`, text: getInfo(profile.dominant?.name || '').luz, msg: getInfo(profile.dominant?.name || '').mensagem, bg: '#eef2ff', border: '#e0e7ff', textColor: '#4338ca' },
-      { label: `Potência: ${profile.potency?.name || profile.secondary?.name}`, text: getInfo(profile.potency?.name || profile.secondary?.name || '').luz, msg: getInfo(profile.potency?.name || profile.secondary?.name || '').mensagem, bg: '#fffbeb', border: '#fde68a', textColor: '#d97706' },
-      { label: `Sombra: ${profile.shadow?.name || 'Sombra'}`, text: getInfo(profile.shadow?.name || '').sombra || 'Padrão inconsciente', msg: getInfo(profile.shadow?.name || '').mensagem, bg: '#f8fafc', border: '#e2e8f0', textColor: '#475569' },
-      { label: `Self / Individuação: ${profile.evolution?.name}`, text: getInfo(profile.evolution?.name || '').luz, msg: getInfo(profile.evolution?.name || '').mensagem, bg: '#ecfdf5', border: '#a7f3d0', textColor: '#059669' },
+      { label: `Persona: ${profile.dominant?.name}`, text: getInfo(profile.dominant?.name || '').luz, msg: getInfo(profile.dominant?.name || '').mensagem, bg: '#eef2ff', border: '#e0e7ff', tc: '#4338ca' },
+      { label: `Potência: ${profile.potency?.name || profile.secondary?.name}`, text: getInfo(profile.potency?.name || profile.secondary?.name || '').luz, msg: getInfo(profile.potency?.name || profile.secondary?.name || '').mensagem, bg: '#fffbeb', border: '#fde68a', tc: '#d97706' },
+      { label: `Sombra: ${profile.shadow?.name || 'Sombra'}`, text: getInfo(profile.shadow?.name || '').sombra || 'Padrão inconsciente', msg: getInfo(profile.shadow?.name || '').mensagem, bg: '#f8fafc', border: '#e2e8f0', tc: '#475569' },
+      { label: `Self / Individuação: ${profile.evolution?.name}`, text: getInfo(profile.evolution?.name || '').luz, msg: getInfo(profile.evolution?.name || '').mensagem, bg: '#ecfdf5', border: '#a7f3d0', tc: '#059669' },
     ];
 
     for (const interp of interpretations) {
-      if (y > pageH - 20) {
-        addPage();
-      }
+      checkPage(16);
+
+      const boxH = 14;
 
       doc.setFillColor(interp.bg);
       doc.setDrawColor(interp.border);
-      doc.roundedRect(margin, y, contentW, 16, 3, 3, 'FD');
+      doc.roundedRect(MARGIN, y, CONTENT_W, boxH, 3, 3, 'FD');
 
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(7.5);
-      doc.setTextColor(interp.textColor);
-      doc.text(interp.label, margin + 4, y + 4);
+      doc.setFontSize(7);
+      doc.setTextColor(interp.tc);
+      doc.text(interp.label, MARGIN + 4, y + 4);
 
       doc.setFont('helvetica', 'normal');
-      doc.setFontSize(6.5);
+      doc.setFontSize(6);
       doc.setTextColor('#64748b');
-      const tLines = doc.splitTextToSize(interp.text, contentW - 8);
-      doc.text(tLines.slice(0, 2), margin + 4, y + 8);
+      const tLines = doc.splitTextToSize(interp.text, CONTENT_W - 8);
+      doc.text(tLines.slice(0, 1), MARGIN + 4, y + 9);
 
       if (interp.msg) {
         doc.setFont('helvetica', 'italic');
-        doc.setFontSize(6);
-        doc.setTextColor(interp.textColor);
-        const msgLine = `"${interp.msg}"`;
-        const mLines = doc.splitTextToSize(msgLine, contentW - 8);
-        if (mLines.length > 0) {
-          doc.text(mLines.slice(0, 1), margin + 4, y + 13);
-        }
+        doc.setFontSize(5.5);
+        doc.setTextColor(interp.tc);
+        const mLines = doc.splitTextToSize(`"${interp.msg}"`, CONTENT_W - 8);
+        if (mLines.length > 0) doc.text(mLines.slice(0, 1), MARGIN + 4, y + 13);
       }
 
-      y += 19;
+      y += boxH + 2;
     }
+
+    y += 4;
   }
 
-  // Save
-  const fileName = `relatorio-arquetipos-${new Date().toISOString().split('T')[0]}.pdf`;
-  doc.save(fileName);
+  doc.save(`relatorio-arquetipos-${new Date().toISOString().split('T')[0]}.pdf`);
 }
