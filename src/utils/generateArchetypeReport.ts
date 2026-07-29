@@ -165,11 +165,10 @@ export function generateArchetypeReport(profiles: ArchetypeProfile[]) {
     doc.text(`- ${p.leader?.name || p.leader_name || 'Desconhecido'}`, MG + 3, y);
     y += 4;
   }
-  y += GAP;
 
   // --- Profile sections (one per page) ---
   for (const [idx, profile] of profiles.entries()) {
-    if (idx > 0) newPage();
+    newPage();
     need(14);
 
     const displayName = profile.leader?.name || profile.leader_name || 'Desconhecido';
