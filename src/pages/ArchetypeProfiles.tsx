@@ -470,29 +470,29 @@ export default function ArchetypeProfiles() {
                         </div>
 
                         {/* Full Archetype Profile */}
-                        <div className="border-t border-slate-100 pt-4">
-                          <h4 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
-                            <Star className="w-4 h-4 text-indigo-500" />
+                        <div className="border-t border-slate-100 pt-3">
+                          <h4 className="text-xs font-semibold text-slate-700 mb-2 flex items-center gap-1.5">
+                            <Star className="w-3.5 h-3.5 text-indigo-500" />
                             Perfil Arquetípico Completo
+                            <span className="text-[10px] font-normal text-slate-400">— 10 arquétipos Pearson</span>
                           </h4>
-                          <p className="text-xs text-slate-400 mb-3">10 arquétipos de personalidade (Pearson) + conceitos Junguianos</p>
-                          <div className="space-y-1.5">
+                          <div className="space-y-1">
                             {sorted.map(([name, score]) => {
                               const info = ARCHETYPE_INFO[name] || { label: name, color: 'text-slate-600', bg: 'bg-slate-50 border-slate-200', bar: 'bg-slate-400' };
                               const isDominant = name === profile.dominant?.name;
                               const isShadow = name === profile.shadow?.name;
                               const isEvolution = name === profile.evolution?.name && !isDominant;
                               return (
-                                <div key={name} className={`flex items-center gap-3 p-2.5 sm:p-3 rounded-lg border ${info.bg}`}>
-                                  <span className={`text-xs sm:text-sm font-bold w-20 sm:w-24 shrink-0 ${info.color}`}>{info.label}</span>
-                                  <div className="flex-1 bg-white/60 rounded-full h-2">
-                                    <div className={`h-2 rounded-full ${info.bar}`} style={{ width: `${score}%`, opacity: isShadow ? 0.4 : 0.7 }} />
+                                <div key={name} className={`flex items-center gap-2 p-1.5 sm:p-2 rounded-lg border ${info.bg}`}>
+                                  <span className={`text-[11px] font-bold w-16 sm:w-20 shrink-0 ${info.color}`}>{info.label}</span>
+                                  <div className="flex-1 bg-white/60 rounded-full h-1.5">
+                                    <div className={`h-1.5 rounded-full ${info.bar}`} style={{ width: `${score}%`, opacity: isShadow ? 0.4 : 0.7 }} />
                                   </div>
-                                  <span className="text-xs text-slate-500 w-8 text-right shrink-0">{score}%</span>
+                                  <span className="text-[11px] text-slate-500 w-7 text-right shrink-0">{score}%</span>
                                   <div className="hidden sm:flex gap-1 shrink-0">
-                                    {isDominant && <span className="text-[10px] font-bold text-indigo-500 bg-indigo-50 px-1.5 py-0.5 rounded">Persona</span>}
-                                    {isShadow && <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">Sombra</span>}
-                                    {isEvolution && <span className="text-[10px] font-bold text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded">Self</span>}
+                                    {isDominant && <span className="text-[9px] font-bold text-indigo-500 bg-indigo-50 px-1.5 py-0.5 rounded">Persona</span>}
+                                    {isShadow && <span className="text-[9px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">Sombra</span>}
+                                    {isEvolution && <span className="text-[9px] font-bold text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded">Self</span>}
                                   </div>
                                 </div>
                               );
