@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, User, Phone, Calendar, MapPin, Tag, UserCheck } from 'lucide-react';
+import { ArrowLeft, User, Phone, Calendar, MapPin, UserCheck, Search, X, Filter } from 'lucide-react';
 import AdminLayout from '../components/AdminLayout';
 
 interface Lead {
@@ -30,28 +30,43 @@ export default function LeadsList() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
   const [leaderName, setLeaderName] = useState<string>('');
+  const [search, setSearch] = useState('');
+  const [filterLeader, setFilterLeader] = useState('');
+  const [filterSegment, setFilterSegment] = useState('');
+  const [leaders, setLeaders] = useState<{ _id: string; name: string }[]>([]);
+
+  const allSegments = useMemo(() => {
+    const set = new Set<string>();
+    leads.forEach(l => l.segment?.forEach(s => set.add(s)));
+    return Array.from(set).sort();
+  }, [leads]);
 
   useEffect(() => {
     const fetchLeads = async () => {
       try {
         const token = localStorage.getItem('token');
         const url = leaderId ? `/api/leaders/${leaderId}/leads` : '/api/leads';
-        const res = await fetch(url, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        
-        if (res.ok) {
-          const data = await res.json();
+        const [leadsRes, leadersRes] = await Promise.all([
+          fetch(url, { headers: { Authorization: `Bearer ${token}` } }),
+          !leaderId ? fetch('/api/leaders', { headers: { Authorization: `Bearer ${token}` } }) : Promise.resolve(null)
+        ]);
+
+        if (leadsRes.ok) {
+          const data = await leadsRes.json();
           setLeads(data);
-          
+
           if (leaderId && data.length === 0) {
-            // Se nao tiver leads mas tiver leaderId, buscar o nome do lider para exibir
             const leaderRes = await fetch(`/api/public/leaders/${leaderId}`);
             if (leaderRes.ok) {
-               const leaderData = await leaderRes.json();
-               setLeaderName(leaderData.name);
+              const leaderData = await leaderRes.json();
+              setLeaderName(leaderData.name);
             }
           }
+        }
+
+        if (leadersRes?.ok) {
+          const data = await leadersRes.json();
+          setLeaders(data.map((l: any) => ({ _id: l._id, name: l.name })));
         }
       } catch (err) {
         console.error(err);
@@ -63,6 +78,35 @@ export default function LeadsList() {
     fetchLeads();
   }, [leaderId]);
 
+  const filteredLeads = useMemo(() => {
+    return leads.filter(lead => {
+      if (search) {
+        const q = search.toLowerCase();
+        const matchName = lead.name.toLowerCase().includes(q);
+        const matchPhone = lead.phone.includes(q);
+        const matchEmail = lead.email?.toLowerCase().includes(q);
+        const matchNeighborhood = lead.neighborhood?.toLowerCase().includes(q);
+        const matchCity = lead.city?.toLowerCase().includes(q);
+        const matchRegisteredBy = lead.registered_by?.toLowerCase().includes(q);
+        if (!(matchName || matchPhone || matchEmail || matchNeighborhood || matchCity || matchRegisteredBy)) return false;
+      }
+
+      if (filterLeader && lead.leaderId._id !== filterLeader) return false;
+
+      if (filterSegment && !lead.segment?.includes(filterSegment)) return false;
+
+      return true;
+    });
+  }, [leads, search, filterLeader, filterSegment]);
+
+  const clearFilters = () => {
+    setSearch('');
+    setFilterLeader('');
+    setFilterSegment('');
+  };
+
+  const hasActiveFilters = search || filterLeader || filterSegment;
+
   return (
     <AdminLayout>
       <div className="mb-8">
@@ -72,22 +116,80 @@ export default function LeadsList() {
           </Link>
         )}
         <h1 className="text-2xl font-bold text-slate-800">
-          {leaderId 
+          {leaderId
             ? `Contatos de ${leads[0]?.leaderId?.name || leaderName || 'Líder'}`
             : 'Todos os Contatos'
           }
         </h1>
         <p className="text-slate-500 mt-1">
-          Total: {leads.length} {leads.length === 1 ? 'pessoa' : 'pessoas'}
+          {filteredLeads.length} {filteredLeads.length === 1 ? 'pessoa' : 'pessoas'}
+          {hasActiveFilters && ` (filtrados de ${leads.length})`}
         </p>
       </div>
 
+      {!loading && (
+        <div className="bg-white rounded-xl border border-slate-200 p-4 mb-6 shadow-sm">
+          <div className="flex items-center gap-2 mb-3">
+            <Filter className="w-4 h-4 text-slate-400" />
+            <span className="text-sm font-medium text-slate-700">Filtros</span>
+            {hasActiveFilters && (
+              <button onClick={clearFilters} className="ml-auto text-xs text-indigo-600 hover:text-indigo-800 flex items-center gap-1">
+                <X className="w-3 h-3" /> Limpar filtros
+              </button>
+            )}
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Buscar por nome, telefone, email, bairro..."
+                className="w-full pl-9 pr-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none"
+              />
+            </div>
+
+            {!leaderId && (
+              <select
+                value={filterLeader}
+                onChange={(e) => setFilterLeader(e.target.value)}
+                className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none"
+              >
+                <option value="">Todas as lideranças</option>
+                {leaders.map((l) => (
+                  <option key={l._id} value={l._id}>{l.name}</option>
+                ))}
+              </select>
+            )}
+
+            <select
+              value={filterSegment}
+              onChange={(e) => setFilterSegment(e.target.value)}
+              className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none"
+            >
+              <option value="">Todos os segmentos</option>
+              {allSegments.map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+      )}
+
       {loading ? (
         <div className="text-center py-12 text-slate-500">Carregando...</div>
-      ) : leads.length === 0 ? (
+      ) : filteredLeads.length === 0 ? (
         <div className="text-center py-16 bg-white rounded-xl border border-slate-200 border-dashed">
           <User className="mx-auto h-12 w-12 text-slate-300 mb-3" />
-          <p className="text-slate-500 font-medium">Nenhum contato encontrado</p>
+          <p className="text-slate-500 font-medium">
+            {hasActiveFilters ? 'Nenhum contato encontrado com esses filtros' : 'Nenhum contato cadastrado'}
+          </p>
+          {hasActiveFilters && (
+            <button onClick={clearFilters} className="mt-2 text-sm text-indigo-600 hover:text-indigo-800">
+              Limpar filtros
+            </button>
+          )}
         </div>
       ) : (
         <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
@@ -106,7 +208,7 @@ export default function LeadsList() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {leads.map((lead) => (
+                {filteredLeads.map((lead) => (
                   <tr key={lead._id} className="hover:bg-slate-50 transition-colors">
                     <td className="px-6 py-4 text-slate-600 text-sm">
                       {lead.registered_by ? (
@@ -164,7 +266,7 @@ export default function LeadsList() {
                     </td>
                     {!leaderId && (
                       <td className="px-6 py-4">
-                        <Link 
+                        <Link
                           to={`/admin/leads/${lead.leaderId._id}`}
                           className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-colors"
                         >
