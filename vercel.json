@@ -8,6 +8,8 @@
     { "source": "/api/:path*", "destination": "/api" },
     { "source": "/admin/:path*", "destination": "/index.html" },
     { "source": "/cadastro", "destination": "/index.html" },
+    { "source": "/cadastro/:path*", "destination": "/index.html" },
+    { "source": "/arquetipo/:path*", "destination": "/index.html" },
     { "source": "/form/:path*", "destination": "/index.html" }
   ]
 }
