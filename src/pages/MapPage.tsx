@@ -219,17 +219,8 @@ export default function MapPage() {
                         display: flex; align-items: center; justify-content: center;
                         font-size: 13px; font-weight: 700; color: white;
                         box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-                        position: relative;
                       ">
                         ${count}
-                        <div style="
-                          position: absolute; top: -6px; right: -6px;
-                          background: white; color: ${color};
-                          font-size: 9px; font-weight: 700;
-                          padding: 1px 4px; border-radius: 8px;
-                          border: 2px solid ${color};
-                          line-height: 1.2;
-                        ">cont</div>
                       </div>`,
                       iconSize: [44, 44],
                       iconAnchor: [22, 22],
