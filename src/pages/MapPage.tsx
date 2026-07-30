@@ -53,31 +53,10 @@ export default function MapPage() {
   useEffect(() => {
     if (!showNeighborhoods || neighborhoods.length > 0) return;
     setLoadingNeighborhoods(true);
-    const query = `[out:json];area["name"="Campo Grande"]["admin_level"="8"]->.city;relation(area.city)["admin_level"="10"]["type"="boundary"]["boundary"="administrative"];out geom;`;
-    const overpassQ = '[out:json][timeout:25];relation["admin_level"="10"]["boundary"="administrative"](-20.6,-54.7,-20.3,-54.4);out geom;';
-    fetch('https://overpass-api.de/api/interpreter', {
-      method: 'POST', body: overpassQ,
-      headers: { 'Accept': 'application/json', 'User-Agent': 'GDL-MB/1.0' }
-    })
+    const token = localStorage.getItem('token');
+    fetch('/api/neighborhoods', { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.json())
-      .then(data => {
-        const features: NeighborhoodFeature[] = (data.elements || [])
-          .filter((el: any) => el.tags?.name && el.members?.length > 0)
-          .map((el: any) => {
-            const outer = el.members.find((m: any) => m.role === 'outer') || el.members[0];
-            if (!outer?.geometry?.length) return null;
-            return {
-              type: 'Feature',
-              properties: { name: el.tags.name },
-              geometry: {
-                type: 'Polygon',
-                coordinates: [outer.geometry.map((p: any) => [p.lon, p.lat])],
-              },
-            };
-          })
-          .filter(Boolean);
-        setNeighborhoods(features);
-      })
+      .then(data => setNeighborhoods(data))
       .catch(err => console.error('Erro ao carregar bairros:', err))
       .finally(() => setLoadingNeighborhoods(false));
   }, [showNeighborhoods]);

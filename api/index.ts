@@ -436,4 +436,32 @@ app.get('/api/map-data', authMiddleware, async (req, res) => {
   }
 });
 
+app.get('/api/neighborhoods', authMiddleware, async (req, res) => {
+  try {
+    const q = '[out:json][timeout:25];relation["admin_level"="10"]["boundary"="administrative"](-20.6,-54.7,-20.3,-54.4);out geom;';
+    const overpassRes = await fetch('https://overpass-api.de/api/interpreter', {
+      method: 'POST', body: q,
+      headers: { 'User-Agent': 'GDL-MB/1.0' },
+    });
+    const data = await overpassRes.json();
+    const features = (data.elements || [])
+      .filter((el: any) => el.tags?.name && el.members?.length > 0)
+      .map((el: any) => {
+        const outers = el.members.filter((m: any) => m.role === 'outer' && m.geometry?.length > 0);
+        if (!outers.length) return null;
+        const ring = outers.flatMap((m: any) => m.geometry.map((p: any) => [p.lon, p.lat]));
+        return {
+          type: 'Feature',
+          properties: { name: el.tags.name },
+          geometry: { type: 'Polygon', coordinates: [ring] },
+        };
+      })
+      .filter(Boolean);
+    res.json(features);
+  } catch (err: any) {
+    console.error(err);
+    res.status(500).json({ error: 'Erro ao carregar bairros' });
+  }
+});
+
 export default app;
