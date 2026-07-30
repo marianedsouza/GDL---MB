@@ -505,6 +505,19 @@ export default function ArchetypeForm({ leaderId, leaderName }: ArchetypeFormPro
   }
 
   if (submitted && results) {
+    const sorted = Object.entries(results.percentages)
+      .sort(([, a], [, b]) => (b as number) - (a as number));
+    const dominantInfo = (ARCHETYPE_DESCRIPTIONS as any)[results.dominant.name];
+    const potencyInfo = (ARCHETYPE_DESCRIPTIONS as any)[results.potency?.name || results.secondary?.name];
+    const shadowInfo = (ARCHETYPE_DESCRIPTIONS as any)[results.shadow?.name];
+    const evoInfo = (ARCHETYPE_DESCRIPTIONS as any)[results.evolution.name];
+    const jungianConcepts = {
+      Persona: { layer: '🎭 Persona (Máscara Social)', desc: 'A persona é a máscara que usamos para nos apresentar ao mundo. Não é falsa — é adaptativa. O perigo está em nos identificarmos completamente com ela, perdendo o contato com quem somos por baixo dela.' },
+      Potencia: { layer: '🌱 Potência (Anima/Animus)', desc: 'Representa qualidades que precisamos desenvolver para crescer. Na psicologia junguiana, a Anima (no homem) e o Animus (na mulher) são pontes para o inconsciente e guias para a individuação.' },
+      Sombra: { layer: '🌑 Sombra (Inconsciente Pessoal)', desc: 'A sombra contém aspectos reprimidos da nossa personalidade. Não é "má" — é simplesmente o que não aprendemos a integrar. Quanto mais a ignoramos, mais ela controla nossos comportamentos automaticamente.' },
+      Ferido: { layer: '🩹 Ferida (Complexo)', desc: 'Feridas emocionais formam complexos — aglomerados de energia psíquica ao redor de experiências dolorosas. Reconhecê-las é o primeiro passo para transformá-las de pontos de fragilidade em fontes de sabedoria.' },
+      Self: { layer: '✨ Self (Individuação)', desc: 'O Self é o arquétipo da totalidade — o objetivo final do processo de individuação junguiano. Não é sobre ser perfeito, mas sobre integrar todas as partes de quem você é: luz e sombra, masculino e feminino, racional e intuitivo.' },
+    };
     return (
       <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 py-12 px-4">
         <div className="max-w-2xl mx-auto">

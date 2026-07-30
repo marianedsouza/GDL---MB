@@ -1,5 +1,6 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
-import { MapContainer, TileLayer, CircleMarker, Popup, Tooltip } from 'react-leaflet';
+import { useState, useEffect, useMemo } from 'react';
+import { MapContainer, TileLayer, CircleMarker, Popup, Tooltip, Marker } from 'react-leaflet';
+import L from 'leaflet';
 import AdminLayout from '../components/AdminLayout';
 import { MapPin, Users, Phone, User, Navigation } from 'lucide-react';
 
@@ -205,35 +206,85 @@ export default function MapPage() {
                 {points.map((p, i) => {
                   const color = leaderColorMap.get(p.leaderId) || '#333';
                   const isLeader = p.type === 'leader';
+
+                  if (isLeader) {
+                    const count = data.find(l => l._id === p.leaderId)?.leads.length || 0;
+                    const icon = L.divIcon({
+                      className: '',
+                      html: `<div style="
+                        width: 44px; height: 44px;
+                        background: ${color};
+                        border: 3px solid white;
+                        border-radius: 50%;
+                        display: flex; align-items: center; justify-content: center;
+                        font-size: 13px; font-weight: 700; color: white;
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                        position: relative;
+                      ">
+                        ${count}
+                        <div style="
+                          position: absolute; top: -6px; right: -6px;
+                          background: white; color: ${color};
+                          font-size: 9px; font-weight: 700;
+                          padding: 1px 4px; border-radius: 8px;
+                          border: 2px solid ${color};
+                          line-height: 1.2;
+                        ">cont</div>
+                      </div>`,
+                      iconSize: [44, 44],
+                      iconAnchor: [22, 22],
+                    });
+
+                    return (
+                      <Marker
+                        key={`${p.type}-${p.leaderId}-${i}`}
+                        position={[p.lat, p.lng]}
+                        icon={icon}
+                      >
+                        <Tooltip direction="top" offset={[0, -22]} permanent={false}>
+                          <div className="text-xs font-medium">{p.label}</div>
+                        </Tooltip>
+                        <Popup>
+                          <div className="text-sm min-w-[160px]">
+                            <div className="font-bold text-base mb-1" style={{ color }}>👤 {p.label}</div>
+                            <div className="text-xs text-slate-500 mb-1">{count} contato(s)</div>
+                            {p.phone && (
+                              <div className="text-xs text-slate-600 flex items-center gap-1 mt-1">
+                                <Phone className="w-3 h-3" /> {p.phone}
+                              </div>
+                            )}
+                            <div className="text-[10px] text-slate-400 mt-1">Liderança</div>
+                          </div>
+                        </Popup>
+                      </Marker>
+                    );
+                  }
+
                   return (
                     <CircleMarker
                       key={`${p.type}-${p.leaderId}-${i}`}
                       center={[p.lat, p.lng]}
-                      radius={isLeader ? 12 : 7}
+                      radius={6}
                       pathOptions={{
                         color: '#fff',
                         fillColor: color,
-                        fillOpacity: 0.9,
-                        weight: isLeader ? 3 : 2,
+                        fillOpacity: 0.8,
+                        weight: 2,
                       }}
                     >
-                      <Tooltip direction="top" offset={[0, -10]} permanent={false}>
+                      <Tooltip direction="top" offset={[0, -6]} permanent={false}>
                         <div className="text-xs font-medium">{p.label}</div>
                       </Tooltip>
                       <Popup>
                         <div className="text-sm min-w-[160px]">
-                          <div className="font-bold text-base mb-1" style={{ color }}>
-                            {isLeader ? '👤 ' : '📋 '}{p.label}
-                          </div>
+                          <div className="font-bold text-base mb-1" style={{ color }}>📋 {p.label}</div>
                           <div className="text-xs text-slate-500 mb-1">{p.leaderName}</div>
                           {p.phone && (
                             <div className="text-xs text-slate-600 flex items-center gap-1 mt-1">
                               <Phone className="w-3 h-3" /> {p.phone}
                             </div>
                           )}
-                          <div className="text-[10px] text-slate-400 mt-1">
-                            {isLeader ? 'Liderança' : 'Contato'}
-                          </div>
+                          <div className="text-[10px] text-slate-400 mt-1">Contato</div>
                         </div>
                       </Popup>
                     </CircleMarker>
