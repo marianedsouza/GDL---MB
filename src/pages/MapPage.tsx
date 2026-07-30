@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { MapContainer, TileLayer, CircleMarker, Popup, Tooltip, Marker } from 'react-leaflet';
+import { MapContainer, TileLayer, CircleMarker, Popup, Tooltip, Marker, GeoJSON } from 'react-leaflet';
 import L from 'leaflet';
 import AdminLayout from '../components/AdminLayout';
 import { MapPin, Users, Phone, User, Navigation } from 'lucide-react';
@@ -34,12 +34,44 @@ const LEADER_COLORS = [
 
 const DEFAULT_CENTER: [number, number] = [-20.4697, -54.6201];
 
+interface NeighborhoodFeature {
+  type: string;
+  properties: { name: string };
+  geometry: { type: string; coordinates: number[][][] };
+}
+
 export default function MapPage() {
   const [data, setData] = useState<LeaderMapData[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedLeader, setSelectedLeader] = useState<string | null>(null);
   const [mapCenter, setMapCenter] = useState<[number, number]>(DEFAULT_CENTER);
   const [showAllContacts, setShowAllContacts] = useState(false);
+  const [showNeighborhoods, setShowNeighborhoods] = useState(false);
+  const [neighborhoods, setNeighborhoods] = useState<NeighborhoodFeature[]>([]);
+  const [loadingNeighborhoods, setLoadingNeighborhoods] = useState(false);
+
+  useEffect(() => {
+    if (!showNeighborhoods || neighborhoods.length > 0) return;
+    setLoadingNeighborhoods(true);
+    const query = `[out:json];area["name"="Campo Grande"]["admin_level"="8"]->.city;relation(area.city)["admin_level"="10"]["type"="boundary"]["boundary"="administrative"];out geom;`;
+    fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`)
+      .then(r => r.json())
+      .then(data => {
+        const features: NeighborhoodFeature[] = (data.elements || [])
+          .filter((el: any) => el.tags?.name && el.geometry?.length > 0)
+          .map((el: any) => ({
+            type: 'Feature',
+            properties: { name: el.tags.name },
+            geometry: {
+              type: 'Polygon',
+              coordinates: [el.geometry.map((p: any) => [p.lon, p.lat])],
+            },
+          }));
+        setNeighborhoods(features);
+      })
+      .catch(err => console.error('Erro ao carregar bairros:', err))
+      .finally(() => setLoadingNeighborhoods(false));
+  }, [showNeighborhoods]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -184,6 +216,16 @@ export default function MapPage() {
             />
             Mostrar todos os contatos
           </label>
+          <label className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer mt-2">
+            <input
+              type="checkbox"
+              checked={showNeighborhoods}
+              onChange={(e) => setShowNeighborhoods(e.target.checked)}
+              className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-600"
+            />
+            Micro regiões dos bairros
+            {loadingNeighborhoods && <span className="text-xs text-slate-400">carregando...</span>}
+          </label>
         </div>
       </div>
 
@@ -203,6 +245,23 @@ export default function MapPage() {
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
+                {showNeighborhoods && neighborhoods.length > 0 && (
+                  <GeoJSON
+                    key={neighborhoods.length}
+                    data={{ type: 'FeatureCollection', features: neighborhoods } as any}
+                    style={() => ({
+                      color: '#475569',
+                      weight: 1.5,
+                      fillColor: '#94a3b8',
+                      fillOpacity: 0.15,
+                    })}
+                    onEachFeature={(feature, layer) => {
+                      if (feature.properties?.name) {
+                        layer.bindTooltip(feature.properties.name, { permanent: false, direction: 'center', className: 'text-xs font-medium' });
+                      }
+                    }}
+                  />
+                )}
                 {points.map((p, i) => {
                   const color = leaderColorMap.get(p.leaderId) || '#333';
                   const isLeader = p.type === 'leader';
