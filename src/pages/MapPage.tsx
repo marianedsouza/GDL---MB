@@ -211,16 +211,26 @@ export default function MapPage() {
                     const count = data.find(l => l._id === p.leaderId)?.leads.length || 0;
                     const icon = L.divIcon({
                       className: '',
-                      html: `<div style="
-                        width: 44px; height: 44px;
-                        background: ${color};
-                        border: 3px solid white;
-                        border-radius: 50%;
-                        display: flex; align-items: center; justify-content: center;
-                        font-size: 13px; font-weight: 700; color: white;
-                        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-                      ">
-                        ${count}
+                      html: `<div style="position:relative;display:flex;align-items:center;justify-content:center">
+                        <div style="
+                          position:absolute;width:44px;height:44px;
+                          border-radius:50%;
+                          background:${color};
+                          opacity:0.4;
+                          animation:radar-ping 2s ease-out infinite;
+                        "></div>
+                        <div style="
+                          width:44px;height:44px;
+                          background:${color};
+                          border:3px solid white;
+                          border-radius:50%;
+                          display:flex;align-items:center;justify-content:center;
+                          font-size:13px;font-weight:700;color:white;
+                          box-shadow:0 2px 8px rgba(0,0,0,0.3);
+                          position:relative;z-index:1;
+                        ">
+                          ${count}
+                        </div>
                       </div>`,
                       iconSize: [44, 44],
                       iconAnchor: [22, 22],
