@@ -6,6 +6,7 @@ import LeadsList from './pages/LeadsList';
 import CadastroLideranca from './pages/CadastroLideranca';
 import ArchetypeAccess from './pages/ArchetypeAccess';
 import ArchetypeProfiles from './pages/ArchetypeProfiles';
+import MapPage from './pages/MapPage';
 import { useEffect, useState, ReactNode } from 'react';
 
 const ProtectedRoute = ({ children }: { children: ReactNode }) => {
@@ -32,6 +33,7 @@ export default function App() {
           <ProtectedRoute>
             <Routes>
               <Route path="dashboard" element={<Dashboard />} />
+              <Route path="mapa" element={<MapPage />} />
               <Route path="arquetipos" element={<ArchetypeProfiles />} />
               <Route path="leads" element={<LeadsList />} />
               <Route path="leads/:leaderId" element={<LeadsList />} />

@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Users, LogOut, FileText, Menu, X, Brain } from 'lucide-react';
+import { Users, LogOut, FileText, Menu, X, Brain, MapPin } from 'lucide-react';
 import { useState } from 'react';
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
@@ -16,6 +16,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const navItems = [
     { name: 'Lideranças', path: '/admin/dashboard', icon: Users },
     { name: 'Perfis Arquetípicos', path: '/admin/arquetipos', icon: Brain },
+    { name: 'Mapa Estratégico', path: '/admin/mapa', icon: MapPin },
     { name: 'Todos os Contatos', path: '/admin/leads', icon: FileText },
   ];
 

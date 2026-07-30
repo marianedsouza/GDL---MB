@@ -402,6 +402,90 @@ app.get('/api/public/archetype/check/:leaderId', async (req, res) => {
   }
 });
 
+// --- GEOCODING ---
+async function geocodeAddress(address: string): Promise<{ lat: number; lng: number } | null> {
+  try {
+    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1&countrycodes=br`;
+    const res = await fetch(url, { headers: { 'User-Agent': 'GDL-MB/1.0' } });
+    const data = await res.json();
+    if (data && data.length > 0) {
+      return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+    }
+  } catch (err) {
+    console.error('Geocode error:', address, err);
+  }
+  return null;
+}
+
+// Get map data (leaders + leads with coordinates)
+app.get('/api/map-data', authMiddleware, async (req, res) => {
+  try {
+    const sb = getSupabase();
+    const { data: leaders, error } = await sb
+      .from('leaders')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    const result = await Promise.all((leaders || []).map(async (leader) => {
+      let lat = leader.latitude;
+      let lng = leader.longitude;
+
+      if ((lat == null || lng == null) && leader.address) {
+        const coords = await geocodeAddress(`${leader.address}, Brasil`);
+        if (coords) {
+          lat = coords.lat;
+          lng = coords.lng;
+          await sb.from('leaders').update({ latitude: lat, longitude: lng }).eq('id', leader.id);
+        }
+      }
+
+      const { data: leadsData } = await sb
+        .from('leads')
+        .select('*')
+        .eq('leader_id', leader.id);
+
+      const leadsWithCoords = await Promise.all((leadsData || []).map(async (lead) => {
+        let llat = lead.latitude;
+        let llng = lead.longitude;
+
+        if ((llat == null || llng == null) && (lead.street || lead.neighborhood || lead.city)) {
+          const leadAddress = `${lead.street || ''}, ${lead.address_number || ''} - ${lead.neighborhood || ''}, ${lead.city || ''}, Brasil`.replace(/,\s*,/g, ',').replace(/^,/, '').trim();
+          if (leadAddress && leadAddress !== ', - , , Brasil') {
+            const coords = await geocodeAddress(leadAddress);
+            if (coords) {
+              llat = coords.lat;
+              llng = coords.lng;
+              await sb.from('leads').update({ latitude: llat, longitude: llng }).eq('id', lead.id);
+            }
+          }
+        }
+
+        return {
+          ...lead,
+          _id: lead.id,
+          latitude: llat,
+          longitude: llng,
+        };
+      }));
+
+      return {
+        ...leader,
+        _id: leader.id,
+        latitude: lat,
+        longitude: lng,
+        leads: leadsWithCoords,
+      };
+    }));
+
+    res.json(result);
+  } catch (err: any) {
+    console.error(err);
+    res.status(500).json({ error: 'Erro ao buscar dados do mapa', details: err.message });
+  }
+});
+
 // --- VITE MIDDLEWARE & SERVER ---
 async function startServer() {
   if (process.env.NODE_ENV !== "production") {

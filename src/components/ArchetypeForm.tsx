@@ -301,6 +301,7 @@ export default function ArchetypeForm({ leaderId, leaderName }: ArchetypeFormPro
   const [results, setResults] = useState<any>(null);
   const [submitError, setSubmitError] = useState('');
   const [renderError, setRenderError] = useState('');
+  const [showFinalScreen, setShowFinalScreen] = useState(false);
 
   const isScaleStep = currentStep < AXES.length;
   const isBrandStep = currentStep === AXES.length;
@@ -462,46 +463,256 @@ export default function ArchetypeForm({ leaderId, leaderName }: ArchetypeFormPro
     }
   };
 
+  if (showFinalScreen) {
+    const sorted = Object.entries(results.percentages)
+      .sort(([, a], [, b]) => (b as number) - (a as number));
+
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 py-12 px-4 flex items-center justify-center">
+        <div className="max-w-lg w-full bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden text-center">
+          <div className="bg-gradient-to-r from-emerald-500 to-teal-600 px-8 py-10 text-white">
+            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Brain className="w-8 h-8" />
+            </div>
+            <h1 className="text-2xl font-bold">Mapeamento Concluído!</h1>
+            <p className="text-emerald-100 mt-1">NeuroEssence360®️</p>
+          </div>
+          <div className="p-8 space-y-4">
+            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto">
+              <svg className="w-8 h-8 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+            </div>
+            <p className="text-xl font-bold text-slate-800">Obrigado, {leaderName}!</p>
+            <p className="text-slate-500 text-sm">
+              Seu mapeamento arquetípico foi concluído com sucesso. Seus resultados já estão disponíveis para análise da equipe.
+            </p>
+
+            <div className="p-4 rounded-xl bg-indigo-50 border border-indigo-100 text-left">
+              <p className="text-xs font-semibold text-indigo-600 uppercase tracking-wider mb-2">Resumo do seu perfil</p>
+              <div className="space-y-1.5 text-sm text-slate-700">
+                <p><span className="font-semibold">Persona:</span> {results.dominant.name} ({results.dominant.score}%)</p>
+                <p><span className="font-semibold">Potência:</span> {results.potency?.name || results.secondary?.name} ({results.potency?.score || results.secondary?.score}%)</p>
+                <p><span className="font-semibold">Evolução:</span> {results.evolution.name} ({results.evolution.score}%)</p>
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-400">
+              Você pode fechar esta página. Seus dados foram registrados com segurança.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (submitted && results) {
     return (
-      <div className="min-h-[100dvh] bg-gradient-to-br from-green-50 to-indigo-50 flex flex-col items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-sm text-center border border-slate-200">
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Brain className="w-8 h-8 text-green-600" />
-          </div>
-          <h1 className="text-xl font-bold text-slate-800 mb-2">Mapeamento Concluído!</h1>
-          <p className="text-sm text-slate-500 mb-1">
-            Olá, <strong>{leaderName}</strong>!
-          </p>
-          <p className="text-xs text-slate-400 mb-4">
-            Seu mapeamento arquetípico foi registrado com sucesso.
-          </p>
-          <div className="p-4 rounded-xl bg-gradient-to-br from-indigo-50 to-purple-50 border border-indigo-100 mb-4 text-left">
-            <p className="text-xs text-indigo-700 leading-relaxed">
-              Obrigado por compartilhar sua jornada conosco. Seu mapeamento será analisado com cuidado
-              pela nossa equipe para apoiar sua caminhada de liderança e autoconhecimento.
-            </p>
-            <p className="text-xs text-indigo-600 mt-2 italic">
-              "O autoconhecimento não é um destino — é uma jornada contínua de descoberta."
-            </p>
-          </div>
-          <p className="text-xs text-slate-500 mb-6">
-            Em breve sua liderança poderá acessar os resultados completos com o suporte da nossa equipe.
-          </p>
-          {submitError && (
-            <div className="p-3 mb-4 bg-amber-50 text-amber-800 rounded-xl text-xs border border-amber-200 flex items-start gap-2">
-              <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-amber-500" />
-              {submitError}
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 py-12 px-4">
+        <div className="max-w-2xl mx-auto">
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-8 py-10 text-center text-white">
+              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Brain className="w-8 h-8" />
+              </div>
+              <h1 className="text-2xl font-bold">Mapeamento Arquetípico</h1>
+              <p className="text-indigo-100 mt-1">NeuroEssence360®️</p>
             </div>
-          )}
-          <button onClick={() => window.close()}
-            className="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-bold rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all shadow-md"
-          >
-            Sair
-          </button>
-          <p className="text-[10px] text-slate-400 mt-4">
-            NeuroEssence360®️
-          </p>
+
+            <div className="p-8 space-y-6">
+              {submitError && (
+                <div className="p-4 bg-amber-50 text-amber-800 rounded-xl text-sm border border-amber-200 flex items-start gap-2">
+                  <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5 text-amber-500" />
+                  <div>
+                    <p className="font-semibold">Resultado gerado localmente</p>
+                    <p className="text-amber-700 text-xs mt-1">{submitError}</p>
+                    <p className="text-amber-600 text-xs mt-1">
+                      Seus resultados estão visíveis abaixo. Para salvar no banco, execute as migrations no Supabase SQL Editor.
+                    </p>
+                  </div>
+                </div>
+              )}
+              <div className="text-center">
+                <p className="text-slate-500">Resultado para</p>
+                <p className="text-xl font-bold text-slate-800">{leaderName}</p>
+              </div>
+
+              <div className="max-w-lg mx-auto p-4 rounded-xl bg-indigo-50 border border-indigo-100 text-sm text-indigo-800">
+                <p className="font-semibold mb-1">Base Junguiana</p>
+                <p className="text-indigo-600 text-xs leading-relaxed">
+                  "Individuação significa tornar-se um ser uno, e na medida em que a individualidade
+                  abrange nossa unicidade mais íntima, tornar-se o próprio Self." — Carl Jung
+                </p>
+                <p className="text-indigo-500 text-xs mt-2">
+                  Este mapeamento integra os arquétipos estruturais de Jung (Persona, Sombra, Anima/Animus, Self)
+                  com a jornada do herói de Joseph Campbell e Carol Pearson.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="p-5 rounded-xl bg-gradient-to-br from-indigo-50 to-purple-50 border border-indigo-100">
+                  <p className="text-xs font-semibold text-indigo-500 uppercase tracking-wider">{jungianConcepts.Persona.layer}</p>
+                  <p className="text-xs text-indigo-400 mb-1">Arquétipo Dominante</p>
+                  <p className="text-2xl font-bold text-indigo-700 mt-1">{results.dominant.name}</p>
+                  <p className="text-[10px] text-indigo-400 mt-1">{dominantInfo?.jung || ''}</p>
+                  <div className="mt-2 w-full bg-indigo-200 rounded-full h-2">
+                    <div className="bg-indigo-600 h-2 rounded-full" style={{ width: `${results.dominant.score}%` }} />
+                  </div>
+                  <p className="text-sm text-indigo-500 mt-1">{results.dominant.score}%</p>
+                  <p className="text-xs text-indigo-500/70 mt-2 leading-relaxed">{jungianConcepts.Persona.desc}</p>
+                </div>
+
+                <div className="p-5 rounded-xl bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-100">
+                  <p className="text-xs font-semibold text-amber-500 uppercase tracking-wider">{jungianConcepts.Potencia.layer}</p>
+                  <p className="text-xs text-amber-400 mb-1">Arquétipo de Potência</p>
+                  <p className="text-2xl font-bold text-amber-700 mt-1">{results.potency?.name || results.secondary?.name}</p>
+                  <p className="text-[10px] text-amber-400 mt-1">{potencyInfo?.jung || ''}</p>
+                  <div className="mt-2 w-full bg-amber-200 rounded-full h-2">
+                    <div className="bg-amber-500 h-2 rounded-full" style={{ width: `${results.potency?.score || results.secondary?.score}%` }} />
+                  </div>
+                  <p className="text-sm text-amber-500 mt-1">{results.potency?.score || results.secondary?.score}%</p>
+                  <p className="text-xs text-amber-500/70 mt-2 leading-relaxed">{jungianConcepts.Potencia.desc}</p>
+                </div>
+
+                <div className="p-5 rounded-xl bg-gradient-to-br from-slate-50 to-red-50 border border-slate-200">
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{jungianConcepts.Sombra.layer}</p>
+                  <p className="text-xs text-slate-400 mb-1">Arquétipo Sombra</p>
+                  <p className="text-2xl font-bold text-slate-600 mt-1">{results.shadow?.name || 'Sombra'}</p>
+                  <p className="text-[10px] text-slate-400 mt-1">{shadowInfo?.jung || 'Conteúdo reprimido'}</p>
+                  <div className="mt-2 w-full bg-slate-200 rounded-full h-2">
+                    <div className="bg-slate-400 h-2 rounded-full" style={{ width: `${results.shadow?.score || 0}%` }} />
+                  </div>
+                  <p className="text-sm text-slate-500 mt-1">{results.shadow?.score || 0}%</p>
+                  <p className="text-xs text-slate-500/70 mt-2 leading-relaxed">{jungianConcepts.Sombra.desc}</p>
+                </div>
+
+                <div className="p-5 rounded-xl bg-gradient-to-br from-rose-50 to-pink-50 border border-rose-100">
+                  <p className="text-xs font-semibold text-rose-500 uppercase tracking-wider">{jungianConcepts.Ferido.layer}</p>
+                  <p className="text-xs text-rose-400 mb-1">Intensidade da Ferida</p>
+                  <p className="text-2xl font-bold text-rose-700 mt-1">{results.wounded?.score || results.shadowIntensity || 0}%</p>
+                  <div className="mt-2 w-full bg-rose-200 rounded-full h-2">
+                    <div className="bg-rose-400 h-2 rounded-full" style={{ width: `${results.wounded?.score || results.shadowIntensity || 0}%` }} />
+                  </div>
+                  <p className="text-xs text-rose-500/70 mt-2 leading-relaxed">{jungianConcepts.Ferido.desc}</p>
+                </div>
+
+                <div className="p-5 rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100">
+                  <p className="text-xs font-semibold text-emerald-500 uppercase tracking-wider">{jungianConcepts.Self.layer}</p>
+                  <p className="text-xs text-emerald-400 mb-1">Arquétipo de Evolução</p>
+                  <p className="text-2xl font-bold text-emerald-700 mt-1">{results.evolution.name}</p>
+                  <p className="text-[10px] text-emerald-400 mt-1">{evoInfo?.jung || ''}</p>
+                  <div className="mt-2 w-full bg-emerald-200 rounded-full h-2">
+                    <div className="bg-emerald-500 h-2 rounded-full" style={{ width: `${results.evolution.score}%` }} />
+                  </div>
+                  <p className="text-sm text-emerald-500 mt-1">{results.evolution.score}%</p>
+                  <p className="text-xs text-emerald-500/70 mt-2 leading-relaxed">{jungianConcepts.Self.desc}</p>
+                </div>
+              </div>
+
+              <div className="border-t border-slate-100 pt-6">
+                <h3 className="text-sm font-semibold text-slate-700 mb-1">Perfil Arquetípico Completo</h3>
+                <p className="text-xs text-slate-400 mb-3">10 arquétipos de personalidade (Pearson) + conceitos Junguianos</p>
+                <div className="space-y-2">
+                  {sorted.map(([name, score]) => {
+                    const info = (ARCHETYPE_DESCRIPTIONS as any)[name];
+                    const isShadow = name === results.shadow?.name;
+                    const isDominant = name === results.dominant.name;
+                    return (
+                      <div key={name} className={`flex items-center gap-3 p-3 rounded-lg border ${info?.bg || 'bg-slate-50 border-slate-200'}`}>
+                        <span className={`text-sm font-bold w-24 shrink-0 ${info?.color || 'text-slate-600'}`}>{info?.label || name}</span>
+                        <div className="flex-1 bg-white/60 rounded-full h-2">
+                          <div className={`h-2 rounded-full ${(info?.color || 'text-slate-600').replace('text', 'bg')}`}
+                            style={{ width: `${score}%`, opacity: isShadow ? 0.4 : 0.7 }} />
+                        </div>
+                        <span className="text-xs text-slate-500 w-8 text-right">{score}%</span>
+                        {isDominant && <span className="text-[10px] font-bold text-indigo-500 bg-indigo-50 px-1.5 py-0.5 rounded">Persona</span>}
+                        {isShadow && <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">Sombra</span>}
+                        {name === results.evolution.name && !isDominant && <span className="text-[10px] font-bold text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded">Self</span>}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="border-t border-slate-100 pt-6">
+                <h3 className="text-sm font-semibold text-slate-700 mb-3">Interpretação Junguiana</h3>
+                <div className="space-y-3 text-sm text-slate-600 leading-relaxed">
+                  <div className="p-4 rounded-xl bg-indigo-50 border border-indigo-100">
+                    <p className="font-semibold text-indigo-700 mb-1">🎭 Persona: {results.dominant.name}</p>
+                    <p>{dominantInfo?.luz}</p>
+                    <p className="text-indigo-600 mt-2 italic">"{dominantInfo?.mensagem}"</p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-amber-50 border border-amber-100">
+                    <p className="font-semibold text-amber-700 mb-1">🌱 Potência: {results.potency?.name || results.secondary?.name}</p>
+                    <p>{potencyInfo?.luz}</p>
+                    <p className="text-amber-600 mt-2 italic">"{potencyInfo?.mensagem}"</p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
+                    <p className="font-semibold text-slate-700 mb-1">🌑 Sombra: {results.shadow?.name}</p>
+                    <p className="text-slate-600">{shadowInfo?.sombra || 'Padrão inconsciente que pode estar sendo projetado nos outros.'}</p>
+                    <p className="text-slate-500 mt-2 text-xs">
+                      Quanto menor a pontuação, mais esse arquétipo foi reprimido. A sombra não é ruim — é energia vital
+                      que precisa ser integrada.
+                    </p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-rose-50 border border-rose-100">
+                    <p className="font-semibold text-rose-700 mb-1">🩹 Ferida: {results.wounded?.score || results.shadowIntensity || 0}% de intensidade</p>
+                    <p className="text-rose-600 text-xs">
+                      Medo de fracasso, necessidade de aprovação, evitação de conflitos — essas são as vozes do
+                      Complexo. O primeiro passo para curar é nomear.
+                    </p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-100">
+                    <p className="font-semibold text-emerald-700 mb-1">✨ Self / Individuação: {results.evolution.name}</p>
+                    <p className="text-emerald-600">{evoInfo?.luz}</p>
+                    <p className="text-emerald-600 mt-2 italic">"{evoInfo?.mensagem}"</p>
+                    <p className="text-emerald-500 text-xs mt-2">
+                      O arquétipo de evolução representa o próximo passo da sua jornada de individuação.
+                      Não é sobre ser perfeita — é sobre ser completa.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t border-slate-100 pt-6">
+                <h3 className="text-sm font-semibold text-slate-700 mb-3">Análise Detalhada dos Arquétipos</h3>
+                <p className="text-xs text-slate-400 mb-3">Compreenda cada arquétipo e sua manifestação na sua personalidade</p>
+                <div className="space-y-3">
+                  {sorted.map(([name, score]) => {
+                    const info = (ARCHETYPE_DESCRIPTIONS as any)[name];
+                    if (!info) return null;
+                    return (
+                      <div key={name} className={`p-4 rounded-xl border ${info.bg || 'bg-slate-50 border-slate-200'}`}>
+                        <div className="flex items-center justify-between mb-2">
+                          <p className={`text-sm font-bold ${info.color || 'text-slate-600'}`}>{info.label || name}</p>
+                          <span className="text-xs text-slate-400 font-semibold">{score}%</span>
+                        </div>
+                        <div className="w-full bg-white/60 rounded-full h-1.5 mb-2">
+                          <div className={`h-1.5 rounded-full ${(info.color || 'text-slate-600').replace('text', 'bg')}`}
+                            style={{ width: `${score}%`, opacity: 0.6 }} />
+                        </div>
+                        <p className="text-xs text-slate-500"><span className="font-medium text-slate-600">Luz:</span> {info.luz}</p>
+                        <p className="text-xs text-slate-500 mt-0.5"><span className="font-medium text-slate-600">Sombra:</span> {info.sombra}</p>
+                        <p className="text-xs text-slate-500 mt-1 italic">{info.mensagem}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <p className="text-center text-xs text-slate-400 pt-4">
+                NeuroEssence360®️ — Método integrado de mapeamento arquetípico baseado em Jung, Campbell e Pearson.
+              </p>
+
+              <div className="border-t border-slate-100 pt-6">
+                <button
+                  type="button"
+                  onClick={() => setShowFinalScreen(true)}
+                  className="w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-lg font-bold rounded-xl hover:from-emerald-600 hover:to-teal-700 transition-all shadow-md"
+                >
+                  Finalizar
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );
