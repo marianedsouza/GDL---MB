@@ -343,9 +343,20 @@ app.get('/api/public/archetype/check/:leaderId', async (req, res) => {
 });
 
 // --- GEOCODING ---
+function cleanAddress(raw: string): string {
+  return raw
+    .replace(/- CEP:?\s*\d{5}-?\d{3}/g, '')
+    .replace(/- CEP:?\s*\d+/g, '')
+    .replace(/\s*-\s*/g, ', ')
+    .replace(/,,+/g, ',')
+    .replace(/^,|,$/g, '')
+    .trim();
+}
+
 async function geocodeAddress(address: string): Promise<{ lat: number; lng: number } | null> {
   try {
-    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1&countrycodes=br`;
+    const clean = cleanAddress(address) + ', MS, Brasil';
+    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(clean)}&limit=1`;
     const res = await fetch(url, { headers: { 'User-Agent': 'GDL-MB/1.0' } });
     const data = await res.json();
     if (data && data.length > 0) {
@@ -390,8 +401,8 @@ app.get('/api/map-data', authMiddleware, async (req, res) => {
         let llng = lead.longitude;
 
         if ((llat == null || llng == null) && (lead.street || lead.neighborhood || lead.city)) {
-          const leadAddress = `${lead.street || ''}, ${lead.address_number || ''} - ${lead.neighborhood || ''}, ${lead.city || ''}, Brasil`.replace(/,\s*,/g, ',').replace(/^,/, '').trim();
-          if (leadAddress && leadAddress !== ', - , , Brasil') {
+          const leadAddress = `${lead.street || ''}, ${lead.address_number || ''}, ${lead.neighborhood || ''}, ${lead.city || ''}, MS, Brasil`.replace(/,\s*,/g, ',').replace(/^,\s*/, '').replace(/,\s*$/, '').trim();
+          if (leadAddress && leadAddress !== ', , , MS, Brasil' && leadAddress !== 'MS, Brasil') {
             const coords = await geocodeAddress(leadAddress);
             if (coords) {
               llat = coords.lat;
