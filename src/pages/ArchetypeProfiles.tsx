@@ -366,6 +366,27 @@ export default function ArchetypeProfiles() {
                       className="overflow-hidden"
                     >
                       <div className="px-4 sm:px-5 pb-5 border-t border-slate-100 pt-4">
+                        <div className="text-center mb-4">
+                          <p className="text-slate-500 text-xs">Resultado para</p>
+                          <p className="text-xl font-bold text-slate-800">{displayName}</p>
+                        </div>
+
+                        {/* Base Junguiana */}
+                        <div className="max-w-lg mx-auto p-4 rounded-xl bg-indigo-50 border border-indigo-100 text-sm text-indigo-800 mb-6">
+                          <p className="font-semibold mb-1 flex items-center gap-1.5">
+                            <Quote className="w-3.5 h-3.5 text-indigo-400" />
+                            Base Junguiana
+                          </p>
+                          <p className="text-indigo-600 text-xs leading-relaxed">
+                            "Individuação significa tornar-se um ser uno, e na medida em que a individualidade
+                            abrange nossa unicidade mais íntima, tornar-se o próprio Self." — Carl Jung
+                          </p>
+                          <p className="text-indigo-500 text-xs mt-2">
+                            Este mapeamento integra os arquétipos estruturais de Jung (Persona, Sombra, Anima/Animus, Self)
+                            com a jornada do herói de Joseph Campbell e Carol Pearson.
+                          </p>
+                        </div>
+
                         {/* 5 Archetype Cards */}
                         <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-6">
                           <ArchetypeCard
@@ -494,6 +515,35 @@ export default function ArchetypeProfiles() {
                                     {isShadow && <span className="text-[9px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">Sombra</span>}
                                     {isEvolution && <span className="text-[9px] font-bold text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded">Self</span>}
                                   </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        {/* Detailed Archetype Analysis */}
+                        <div className="border-t border-slate-100 pt-4 mt-4">
+                          <h4 className="text-sm font-semibold text-slate-700 mb-1 flex items-center gap-2">
+                            <Sparkles className="w-4 h-4 text-indigo-500" />
+                            Análise Detalhada dos Arquétipos
+                          </h4>
+                          <p className="text-xs text-slate-400 mb-3">Compreenda cada arquétipo e sua manifestação na personalidade</p>
+                          <div className="space-y-3">
+                            {sorted.map(([name, score]) => {
+                              const info = ARCHETYPE_INFO[name];
+                              if (!info) return null;
+                              return (
+                                <div key={name} className={`p-4 rounded-xl border ${info.bg || 'bg-slate-50 border-slate-200'}`}>
+                                  <div className="flex items-center justify-between mb-2">
+                                    <p className={`text-sm font-bold ${info.color || 'text-slate-600'}`}>{info.label || name}</p>
+                                    <span className="text-xs text-slate-400 font-semibold">{score}%</span>
+                                  </div>
+                                  <div className="w-full bg-white/60 rounded-full h-1.5 mb-2">
+                                    <div className={`h-1.5 rounded-full ${info.bar || 'bg-slate-400'}`} style={{ width: `${score}%`, opacity: 0.6 }} />
+                                  </div>
+                                  <p className="text-xs text-slate-500"><span className="font-medium text-slate-600">Luz:</span> {info.luz}</p>
+                                  <p className="text-xs text-slate-500 mt-0.5"><span className="font-medium text-slate-600">Sombra:</span> {info.sombra}</p>
+                                  <p className="text-xs text-slate-500 mt-1 italic">{info.mensagem}</p>
                                 </div>
                               );
                             })}
