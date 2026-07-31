@@ -138,6 +138,7 @@ app.post('/api/public/leaders', async (req, res) => {
       can_host_meetings: payload.canHostMeetings,
       skills: payload.skills,
       commitment_agreed: payload.commitmentAgreed,
+      lgpd_agreed: payload.lgpdAgreed,
       direct_leader: payload.directLeader,
       address: `${payload.street || ''}, ${payload.addressNumber || 'S/N'} - ${payload.neighborhood || ''}, ${payload.city || ''} - CEP: ${payload.cep || ''}`
     };

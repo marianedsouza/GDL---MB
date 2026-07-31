@@ -177,6 +177,7 @@ app.post('/api/public/leaders', async (req, res) => {
       can_host_meetings: p.canHostMeetings,
       skills: p.skills,
       commitment_agreed: p.commitmentAgreed,
+      lgpd_agreed: p.lgpdAgreed,
       direct_leader: p.directLeader,
       address: `${p.street || ''}, ${p.addressNumber || 'S/N'} - ${p.neighborhood || ''}, ${p.city || ''} - CEP: ${p.cep || ''}`,
     };

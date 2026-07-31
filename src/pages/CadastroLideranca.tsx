@@ -4,6 +4,7 @@ import { User, Phone, Mail, MapPin, Briefcase, CheckCircle2, Brain, AlertCircle,
 import { getRegioesPorBairro } from '../utils/regioes';
 
 const REGIOES = ['Anhanduizinho', 'Bandeira', 'Centro', 'Imbirussu', 'Lagoa', 'Prosa', 'Segredo', 'Distritos', 'Outro'];
+const DIAS_SEMANA = ['Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado', 'Domingo'];
 import ArchetypeForm from '../components/ArchetypeForm';
 
 export default function CadastroLideranca() {
@@ -34,7 +35,8 @@ export default function CadastroLideranca() {
     canOrganizeMeetings: '',
     canHostMeetings: '',
     skills: [] as string[],
-    commitmentAgreed: false
+    commitmentAgreed: false,
+    lgpdAgreed: false
   });
 
   const [searchParams] = useSearchParams();
@@ -103,6 +105,12 @@ export default function CadastroLideranca() {
   const toggleArrayItem = (arr: string[], item: string) =>
     arr.includes(item) ? arr.filter((i) => i !== item) : [...arr, item];
 
+  const toggleAvailableDay = (day: string) => {
+    const current = formData.availableDays ? formData.availableDays.split(', ').filter(Boolean) : [];
+    const next = current.includes(day) ? current.filter((d) => d !== day) : [...current, day];
+    setFormData({ ...formData, availableDays: next.join(', ') });
+  };
+
   useEffect(() => {
     if (urlLeaderId) {
       checkArchetypeCompletion(urlLeaderId);
@@ -136,7 +144,7 @@ export default function CadastroLideranca() {
     const { name: fieldName, value, type } = e.target as HTMLInputElement;
     if (type === 'checkbox') {
       const checked = (e.target as HTMLInputElement).checked;
-      if (fieldName === 'commitmentAgreed') {
+      if (fieldName === 'commitmentAgreed' || fieldName === 'lgpdAgreed') {
         setFormData({ ...formData, [fieldName]: checked });
       } else {
         const newSkills = checked 
@@ -153,6 +161,10 @@ export default function CadastroLideranca() {
     e.preventDefault();
     if (!formData.commitmentAgreed) {
       setError('Você deve concordar com o termo de compromisso.');
+      return;
+    }
+    if (!formData.lgpdAgreed) {
+      setError('Você deve concordar com o termo de consentimento LGPD.');
       return;
     }
     setSubmitting(true);
@@ -523,8 +535,15 @@ export default function CadastroLideranca() {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-slate-700 mb-1">Dias disponíveis</label>
-                <input type="text" name="availableDays" value={formData.availableDays} onChange={handleChange} placeholder="Ex: Segundas e Quartas à noite" className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none" />
+                <label className="block text-sm font-medium text-slate-700 mb-2">Dias disponíveis</label>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {DIAS_SEMANA.map(day => (
+                    <label key={day} className="flex items-center gap-2 cursor-pointer p-3 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">
+                      <input type="checkbox" checked={formData.availableDays.split(', ').includes(day)} onChange={() => toggleAvailableDay(day)} className="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-600" />
+                      <span className="text-sm font-medium text-slate-700">{day}</span>
+                    </label>
+                  ))}
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Possui veículo?</label>
@@ -582,14 +601,25 @@ export default function CadastroLideranca() {
             <h2 className="text-xl font-semibold text-slate-800 mb-4 pb-2 border-b border-slate-200 flex items-center gap-2">
               <span className="w-5 h-5 flex items-center justify-center bg-indigo-100 text-indigo-600 rounded-full text-xs font-bold">7</span> BLOCO 7 – Compromisso
             </h2>
-            <div className="bg-slate-50 p-6 rounded-xl border border-slate-200">
-              <p className="text-slate-700 mb-4">
-                Declaro que participarei da Equipe MB com responsabilidade, ética e comprometimento.
-              </p>
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input required type="checkbox" name="commitmentAgreed" onChange={handleChange} checked={formData.commitmentAgreed} className="w-5 h-5 text-indigo-600 rounded border-slate-300 focus:ring-indigo-600" />
-                <span className="font-semibold text-slate-800">Concordo.</span>
-              </label>
+            <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 space-y-5">
+              <div>
+                <p className="text-slate-700 mb-4">
+                  Declaro que participarei da Equipe MB com responsabilidade, ética e comprometimento.
+                </p>
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input required type="checkbox" name="commitmentAgreed" onChange={handleChange} checked={formData.commitmentAgreed} className="w-5 h-5 text-indigo-600 rounded border-slate-300 focus:ring-indigo-600" />
+                  <span className="font-semibold text-slate-800">Concordo.</span>
+                </label>
+              </div>
+              <div className="border-t border-slate-200 pt-5">
+                <p className="text-slate-700 mb-4">
+                  Declaro que li e concordo com o tratamento dos meus dados pessoais (nome, CPF, telefone, e-mail e endereço) pela Equipe MB para fins exclusivos de cadastro, comunicação e mobilização da liderança política, nos termos da Lei Geral de Proteção de Dados (Lei nº 13.709/2018). Sei que posso solicitar, a qualquer momento, a correção ou a exclusão dos meus dados.
+                </p>
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input required type="checkbox" name="lgpdAgreed" onChange={handleChange} checked={formData.lgpdAgreed} className="w-5 h-5 text-indigo-600 rounded border-slate-300 focus:ring-indigo-600" />
+                  <span className="font-semibold text-slate-800">Concordo com o termo LGPD.</span>
+                </label>
+              </div>
             </div>
           </section>
 
