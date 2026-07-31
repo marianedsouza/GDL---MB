@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { User, Phone, Mail, MapPin, Briefcase, CheckCircle2, Brain, AlertCircle, Loader2, ExternalLink, Copy, Check, UserCheck } from 'lucide-react';
+import { getRegioesPorBairro } from '../utils/regioes';
 
 const REGIOES = ['Anhanduizinho', 'Bandeira', 'Centro', 'Imbirussu', 'Lagoa', 'Prosa', 'Segredo', 'Distritos', 'Outro'];
 import ArchetypeForm from '../components/ArchetypeForm';
@@ -77,7 +78,7 @@ export default function CadastroLideranca() {
             street: data.logradouro || '',
             neighborhood: data.bairro || '',
             city: data.localidade || '',
-            administrativeRegions: [],
+            administrativeRegions: getRegioesPorBairro(data.bairro || '', data.localidade || ''),
             cep: val
           }));
         }

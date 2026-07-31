@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { User, Phone, CheckCircle2, AlertCircle, Mail, MapPin, Users, Target, Star, ArrowRight, FileText, UserCheck } from 'lucide-react';
+import { getRegioesPorBairro } from '../utils/regioes';
 
 const REGIOES = ['Anhanduizinho', 'Bandeira', 'Centro', 'Imbirussu', 'Lagoa', 'Prosa', 'Segredo', 'Distritos', 'Outro'];
 const ORIGENS = ['Reunião', 'Visita domiciliar', 'Evento', 'Igreja', 'Escola', 'Universidade', 'Comércio', 'Indicação', 'Redes sociais', 'Outro'];
@@ -86,6 +87,7 @@ export default function PublicForm() {
           setStreet(data.logradouro || '');
           setNeighborhood(data.bairro || '');
           setCity(data.localidade || '');
+          setAdministrativeRegions(getRegioesPorBairro(data.bairro || '', data.localidade || ''));
         }
       } catch {
         setCepError('Erro ao buscar o CEP.');
