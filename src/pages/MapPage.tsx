@@ -241,14 +241,14 @@ export default function MapPage() {
                     key="neighborhoods"
                     data={{ type: 'FeatureCollection', features: neighborhoods } as any}
                     style={() => ({
-                      color: '#475569',
-                      weight: 1.5,
+                      color: '#334155',
+                      weight: 2,
                       fillColor: '#94a3b8',
-                      fillOpacity: 0.15,
+                      fillOpacity: 0.2,
                     })}
                     onEachFeature={(feature, layer) => {
                       if (feature.properties?.name) {
-                        layer.bindTooltip(feature.properties.name, { permanent: false, direction: 'center', className: 'text-xs font-medium' });
+                        layer.bindTooltip(feature.properties.name, { permanent: true, direction: 'center', className: 'text-xs font-medium bg-white/80 border border-slate-300 rounded px-1 py-0.5' });
                       }
                     }}
                   />
