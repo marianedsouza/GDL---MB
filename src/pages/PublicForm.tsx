@@ -327,7 +327,14 @@ export default function PublicForm() {
                 <input type="text" value={neighborhood} onChange={(e) => setNeighborhood(e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none" placeholder="Bairro" />
               </div>
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-slate-700 mb-2">Região Administrativa (pode selecionar mais de uma)</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Região Administrativa (detectada pelo CEP)</label>
+                <input
+                  type="text"
+                  readOnly
+                  value={administrativeRegions.length > 0 ? administrativeRegions.join(', ') : 'Nenhuma região detectada'}
+                  className="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl text-slate-700 outline-none cursor-default"
+                />
+                <label className="block text-sm font-medium text-slate-700 mb-2 mt-3">Ajuste manualmente (pode selecionar mais de uma)</label>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                   {(city ? getRegioesPorCidade(city) : REGIOES).map((r) => (
                     <label key={r} className={`flex items-center gap-2 p-2.5 border rounded-lg cursor-pointer transition-colors ${administrativeRegions.includes(r) ? 'border-indigo-400 bg-indigo-50' : 'border-slate-200 hover:bg-slate-50'}`}>
