@@ -365,18 +365,18 @@ export default function ArchetypeForm({ leaderId, leaderName }: ArchetypeFormPro
 
   if (showFinalScreen) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 py-12 px-4 flex items-center justify-center">
+      <div className="min-h-screen bg-white py-12 px-4 flex items-center justify-center">
         <div className="max-w-lg w-full bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden text-center">
-          <div className="bg-gradient-to-r from-emerald-500 to-teal-600 px-8 py-10 text-white">
-            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 overflow-hidden">
-              <img src="/logo-synaptessence.png" alt="SynaptEssence" className="w-12 h-12 sm:w-14 sm:h-14 object-contain" />
+          <div className="bg-gradient-to-r from-[#8A63C8] to-[#469AC5] px-8 py-10 text-white">
+            <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-4 overflow-hidden">
+              <img src="/logo-synaptessence.png" alt="SynaptEssence" className="w-20 h-20 sm:w-24 sm:h-24 object-contain" />
             </div>
             <h1 className="text-2xl font-bold">Mapeamento Concluído!</h1>
-            <p className="text-emerald-100 mt-1">Plataforma Estratégica</p>
+            <p className="text-[#E7D9F5] mt-1">Plataforma Estratégica</p>
           </div>
           <div className="p-8 space-y-4">
-            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto">
-              <svg className="w-8 h-8 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+            <div className="w-16 h-16 bg-[#F3ECFB] rounded-full flex items-center justify-center mx-auto">
+              <svg className="w-8 h-8 text-[#8A63C8]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
             </div>
             <p className="text-xl font-bold text-slate-800">Obrigado, {leaderName}!</p>
             <p className="text-slate-500 text-sm">
@@ -407,17 +407,17 @@ export default function ArchetypeForm({ leaderId, leaderName }: ArchetypeFormPro
   const StepIcon = stepIcon;
 
   return (
-    <div className="min-h-[100dvh] bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
+    <div className="min-h-[100dvh] bg-white">
       <div className="max-w-3xl mx-auto px-3 sm:px-4 py-4 sm:py-8">
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200">
-          <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-4 sm:px-8 py-5 sm:py-8 text-center text-white">
-            <div className="w-10 h-10 sm:w-14 sm:h-14 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3 overflow-hidden">
-              <img src="/logo-synaptessence.png" alt="SynaptEssence" className="w-8 h-8 sm:w-12 sm:h-12 object-contain" />
+          <div className="bg-gradient-to-r from-[#8A63C8] to-[#469AC5] px-4 sm:px-8 py-5 sm:py-8 text-center text-white">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3 overflow-hidden">
+              <img src="/logo-synaptessence.png" alt="SynaptEssence" className="w-14 h-14 sm:w-16 sm:h-16 object-contain" />
             </div>
             <h1 className="text-lg sm:text-2xl font-bold">Plataforma Estratégica</h1>
-            <p className="text-indigo-100 text-xs sm:text-sm">Método: SynaptEssence360®</p>
-            <p className="text-indigo-200 text-[10px] sm:text-xs mt-1 sm:mt-2">Tecnologia Social de Desenvolvimento Humano Integral</p>
-            <p className="text-indigo-200 text-[10px] sm:text-xs mt-1 sm:mt-2">
+            <p className="text-[#E7D9F5] text-xs sm:text-sm">Método: SynaptEssence360®</p>
+            <p className="text-[#D3C0EC] text-[10px] sm:text-xs mt-1 sm:mt-2">Tecnologia Social de Desenvolvimento Humano Integral</p>
+            <p className="text-[#D3C0EC] text-[10px] sm:text-xs mt-1 sm:mt-2">
               {totalAnswered} de {totalQuestions} perguntas respondidas
             </p>
             <div className="mt-2 sm:mt-3 w-full bg-white/20 rounded-full h-1.5 max-w-md mx-auto">
@@ -427,7 +427,7 @@ export default function ArchetypeForm({ leaderId, leaderName }: ArchetypeFormPro
 
           <div className="px-4 sm:px-8 pt-4 sm:pt-6 pb-1 sm:pb-2">
             <div className="flex items-center justify-between mb-1 sm:mb-2">
-              <span className="text-[10px] sm:text-xs font-medium text-indigo-600 uppercase tracking-wider flex items-center gap-1 sm:gap-1.5">
+              <span className="text-[10px] sm:text-xs font-medium text-[#8A63C8] uppercase tracking-wider flex items-center gap-1 sm:gap-1.5">
                 <StepIcon className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> {stepLabel}
               </span>
               <span className="text-[10px] sm:text-xs text-slate-400">
@@ -440,7 +440,7 @@ export default function ArchetypeForm({ leaderId, leaderName }: ArchetypeFormPro
             <div className="flex gap-1 mt-2 sm:mt-3">
               {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
                 <div key={i} className={`h-1 flex-1 rounded-full transition-colors ${
-                  i < currentStep ? 'bg-indigo-500' : i === currentStep ? 'bg-indigo-600' : 'bg-slate-200'
+                  i < currentStep ? 'bg-[#8A63C8]' : i === currentStep ? 'bg-[#8A63C8]' : 'bg-slate-200'
                 }`} />
               ))}
             </div>
@@ -461,8 +461,8 @@ export default function ArchetypeForm({ leaderId, leaderName }: ArchetypeFormPro
                       <button key={s.value} type="button" onClick={() => setAnswer(q.id, s.value)}
                         className={`py-2.5 sm:py-3 px-1 rounded-lg text-[10px] sm:text-xs font-semibold transition-all min-h-[40px] sm:min-h-[44px] ${
                           answers[q.id] === s.value
-                            ? 'bg-indigo-600 text-white shadow-sm ring-2 ring-indigo-300'
-                            : 'bg-white text-slate-600 border border-slate-200 active:bg-indigo-50'
+                            ? 'bg-[#8A63C8] text-white shadow-sm ring-2 ring-[#C9B5E8]'
+                            : 'bg-white text-slate-600 border border-slate-200 active:bg-[#F3ECFB]'
                         }`}
                       >
                         <span className="block leading-tight">{s.value}</span>
@@ -495,23 +495,23 @@ export default function ArchetypeForm({ leaderId, leaderName }: ArchetypeFormPro
                     q.type === 'single' ? (
                       <label key={opt.label} className={`flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-lg border cursor-pointer transition-colors ${
                         brandSingle === opt.label
-                          ? 'border-indigo-400 bg-indigo-50'
-                          : 'border-slate-200 bg-white active:border-indigo-200'
+                          ? 'border-[#A98AD8] bg-[#F3ECFB]'
+                          : 'border-slate-200 bg-white active:border-[#D3C0EC]'
                       }`}>
                         <input type="radio" name={`brand-${q.id}`} checked={brandSingle === opt.label}
                           onChange={() => setBrandSingle(opt.label)}
-                          className="w-4 h-4 shrink-0 text-indigo-600 border-slate-300 focus:ring-indigo-600" />
+                          className="w-4 h-4 shrink-0 text-[#8A63C8] border-slate-300 focus:ring-[#8A63C8]" />
                         <span className="text-xs sm:text-sm text-slate-700 leading-tight">{opt.label}</span>
                       </label>
                     ) : (
                       <label key={opt.label} className={`flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-lg border cursor-pointer transition-colors ${
                         (brandMulti[q.id] || []).includes(opt.label)
-                          ? 'border-indigo-400 bg-indigo-50'
-                          : 'border-slate-200 bg-white active:border-indigo-200'
+                          ? 'border-[#A98AD8] bg-[#F3ECFB]'
+                          : 'border-slate-200 bg-white active:border-[#D3C0EC]'
                       }`}>
                         <input type="checkbox" checked={(brandMulti[q.id] || []).includes(opt.label)}
                           onChange={() => toggleBrandMulti(q.id, opt.label)}
-                          className="w-4 h-4 shrink-0 text-indigo-600 rounded border-slate-300 focus:ring-indigo-600" />
+                          className="w-4 h-4 shrink-0 text-[#8A63C8] rounded border-slate-300 focus:ring-[#8A63C8]" />
                         <span className="text-xs sm:text-sm text-slate-700 leading-tight">{opt.label}</span>
                       </label>
                     )
@@ -533,7 +533,7 @@ export default function ArchetypeForm({ leaderId, leaderName }: ArchetypeFormPro
                     value={textAnswers[q.id] || ''}
                     onChange={(e) => setTextAnswers((prev) => ({ ...prev, [q.id]: e.target.value }))}
                     rows={3}
-                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-white border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none text-xs sm:text-sm resize-y"
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-white border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-[#8A63C8] outline-none text-xs sm:text-sm resize-y"
                     placeholder="Escreva aqui..."
                   />
                 </div>
@@ -563,13 +563,13 @@ export default function ArchetypeForm({ leaderId, leaderName }: ArchetypeFormPro
 
               {isLast ? (
                 <button type="button" onClick={handleSubmit} disabled={submitting}
-                  className="px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-xs sm:text-sm font-bold rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md min-h-[40px] sm:min-h-[44px]"
+                  className="px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-[#8A63C8] to-[#469AC5] text-white text-xs sm:text-sm font-bold rounded-xl hover:from-[#6E49AC] hover:to-[#3E7FC0] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md min-h-[40px] sm:min-h-[44px]"
                 >
                   {submitting ? 'Processando...' : 'Finalizar'}
                 </button>
               ) : (
                 <button type="button" onClick={goNext} disabled={isScaleStep && !isCurrentComplete}
-                  className="flex items-center gap-1 sm:gap-1.5 px-4 sm:px-6 py-2.5 sm:py-3 bg-indigo-600 text-white text-xs sm:text-sm font-bold rounded-xl hover:bg-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md min-h-[40px] sm:min-h-[44px]"
+                  className="flex items-center gap-1 sm:gap-1.5 px-4 sm:px-6 py-2.5 sm:py-3 bg-[#8A63C8] text-white text-xs sm:text-sm font-bold rounded-xl hover:bg-[#6E49AC] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md min-h-[40px] sm:min-h-[44px]"
                 >
                   <span className="hidden sm:inline">Próximo</span> <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 </button>

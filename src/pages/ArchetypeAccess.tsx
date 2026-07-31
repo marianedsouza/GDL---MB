@@ -43,9 +43,9 @@ export default function ArchetypeAccess() {
 
   if (loading) {
     return (
-      <div className="min-h-[100dvh] bg-gradient-to-br from-indigo-50 to-purple-50 flex items-center justify-center p-4">
+      <div className="min-h-[100dvh] bg-white flex items-center justify-center p-4">
         <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-sm text-center border border-slate-200">
-          <Loader2 className="h-8 w-8 sm:h-10 sm:w-10 text-indigo-600 animate-spin mx-auto mb-3 sm:mb-4" />
+          <Loader2 className="h-8 w-8 sm:h-10 sm:w-10 text-[#8A63C8] animate-spin mx-auto mb-3 sm:mb-4" />
           <p className="text-sm sm:text-base text-slate-600">Carregando...</p>
         </div>
       </div>
@@ -70,7 +70,7 @@ export default function ArchetypeAccess() {
 
   if (alreadyCompleted) {
     return (
-      <div className="min-h-[100dvh] bg-gradient-to-br from-green-50 to-indigo-50 flex flex-col items-center justify-center p-4">
+      <div className="min-h-[100dvh] bg-white flex flex-col items-center justify-center p-4">
         <div className="max-w-lg w-full bg-white p-6 sm:p-8 rounded-2xl shadow-sm text-center border border-slate-200">
           <CheckCircle2 className="h-10 w-10 sm:h-12 sm:w-12 text-green-500 mx-auto mb-3 sm:mb-4" />
           <h2 className="text-xl sm:text-2xl font-bold text-slate-800 mb-2">Mapeamento já realizado!</h2>
@@ -86,10 +86,10 @@ export default function ArchetypeAccess() {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-gradient-to-br from-indigo-50 to-purple-50 flex flex-col items-center justify-center p-4">
+    <div className="min-h-[100dvh] bg-white flex flex-col items-center justify-center p-4">
       <div className="max-w-lg w-full bg-white p-6 sm:p-8 rounded-2xl shadow-sm text-center border border-slate-200">
-        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white shadow-sm border border-slate-200 flex items-center justify-center mx-auto mb-3 sm:mb-4 overflow-hidden">
-          <img src="/logo-synaptessence.png" alt="SynaptEssence" className="w-16 h-16 sm:w-20 sm:h-20 object-contain" />
+        <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-white shadow-md border border-slate-100 flex items-center justify-center mx-auto mb-4 sm:mb-5 overflow-hidden">
+          <img src="/logo-synaptessence.png" alt="SynaptEssence" className="w-24 h-24 sm:w-28 sm:h-28 object-contain" />
         </div>
         <h2 className="text-xl sm:text-2xl font-bold text-slate-800 mb-2">Mapeamento Arquetípico</h2>
         <p className="text-sm sm:text-base text-slate-600 mb-2">
@@ -100,7 +100,7 @@ export default function ArchetypeAccess() {
         </p>
         <button
           onClick={() => setShowForm(true)}
-          className="flex items-center justify-center gap-2 px-5 sm:px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm sm:text-base font-bold rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all shadow-md mx-auto"
+          className="flex items-center justify-center gap-2 px-5 sm:px-6 py-3 bg-gradient-to-r from-[#8A63C8] to-[#469AC5] text-white text-sm sm:text-base font-bold rounded-xl hover:from-[#6E49AC] hover:to-[#3E7FC0] transition-all shadow-md mx-auto"
         >
           <Brain className="w-4 h-4 sm:w-5 sm:h-5" /> Iniciar Mapeamento
         </button>
