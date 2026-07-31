@@ -96,7 +96,16 @@ app.post('/api/leaders', authMiddleware, async (req, res) => {
       .single();
 
     if (error) throw error;
-    
+
+    if (leader.address && leader.latitude == null) {
+      const coords = await geocodeAddress(leader.address);
+      if (coords) {
+        await getSupabase().from('leaders').update({ latitude: coords.lat, longitude: coords.lng }).eq('id', leader.id);
+        leader.latitude = coords.lat;
+        leader.longitude = coords.lng;
+      }
+    }
+
     res.json({ ...leader, _id: leader.id });
   } catch (err: any) {
     console.error(err);
@@ -150,7 +159,16 @@ app.post('/api/public/leaders', async (req, res) => {
       .single();
 
     if (error) throw error;
-    
+
+    if (leader.address && leader.latitude == null) {
+      const coords = await geocodeAddress(leader.address);
+      if (coords) {
+        await getSupabase().from('leaders').update({ latitude: coords.lat, longitude: coords.lng }).eq('id', leader.id);
+        leader.latitude = coords.lat;
+        leader.longitude = coords.lng;
+      }
+    }
+
     res.json({ ...leader, _id: leader.id });
   } catch (err: any) {
     console.error(err);
@@ -283,7 +301,7 @@ app.post('/api/public/leads', async (req, res) => {
       });
     }
 
-    const { error } = await getSupabase()
+    const { data: createdLead, error } = await getSupabase()
       .from('leads')
       .insert([{
         leader_id: leaderId,
@@ -304,10 +322,23 @@ app.post('/api/public/leads', async (req, res) => {
         influence_potential: influencePotentials,
         next_action: nextActions,
         observations,
-      }]);
+      }])
+      .select()
+      .single();
 
     if (error) throw error;
-    
+
+    if (createdLead) {
+      const leadAddress = `${street || ''}, ${number || ''}, ${neighborhood || ''}, ${city || ''}`
+        .replace(/,\s*,/g, ',').replace(/^,\s*/, '').replace(/,\s*$/, '').trim();
+      if (leadAddress && leadAddress !== 'MS, Brasil') {
+        const coords = await geocodeAddress(leadAddress);
+        if (coords) {
+          await getSupabase().from('leads').update({ latitude: coords.lat, longitude: coords.lng }).eq('id', createdLead.id);
+        }
+      }
+    }
+
     res.json({ success: true });
   } catch (err: any) {
     console.error(err);
@@ -440,17 +471,24 @@ app.get('/api/map-data', authMiddleware, async (req, res) => {
 
     if (error) throw error;
 
-    const result = await Promise.all((leaders || []).map(async (leader) => {
+    const GEOCODE_BATCH = 15;
+    let geocoded = 0;
+    const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
+
+    const result = [];
+    for (const leader of leaders || []) {
       let lat = leader.latitude;
       let lng = leader.longitude;
 
-      if ((lat == null || lng == null) && leader.address) {
-        const coords = await geocodeAddress(`${leader.address}, Brasil`);
+      if ((lat == null || lng == null) && leader.address && geocoded < GEOCODE_BATCH) {
+        const coords = await geocodeAddress(leader.address);
+        geocoded++;
         if (coords) {
           lat = coords.lat;
           lng = coords.lng;
           await sb.from('leaders').update({ latitude: lat, longitude: lng }).eq('id', leader.id);
         }
+        await sleep(1100);
       }
 
       const { data: leadsData } = await sb
@@ -458,38 +496,42 @@ app.get('/api/map-data', authMiddleware, async (req, res) => {
         .select('*')
         .eq('leader_id', leader.id);
 
-      const leadsWithCoords = await Promise.all((leadsData || []).map(async (lead) => {
+      const leadsWithCoords = [];
+      for (const lead of leadsData || []) {
         let llat = lead.latitude;
         let llng = lead.longitude;
 
-        if ((llat == null || llng == null) && (lead.street || lead.neighborhood || lead.city)) {
-          const leadAddress = `${lead.street || ''}, ${lead.address_number || ''}, ${lead.neighborhood || ''}, ${lead.city || ''}, MS, Brasil`.replace(/,\s*,/g, ',').replace(/^,\s*/, '').replace(/,\s*$/, '').trim();
-          if (leadAddress && leadAddress !== ', , , MS, Brasil' && leadAddress !== 'MS, Brasil') {
+        if ((llat == null || llng == null) && (lead.street || lead.neighborhood || lead.city) && geocoded < GEOCODE_BATCH) {
+          const leadAddress = `${lead.street || ''}, ${lead.address_number || ''}, ${lead.neighborhood || ''}, ${lead.city || ''}`
+            .replace(/,\s*,/g, ',').replace(/^,\s*/, '').replace(/,\s*$/, '').trim();
+          if (leadAddress && leadAddress !== 'MS, Brasil') {
             const coords = await geocodeAddress(leadAddress);
+            geocoded++;
             if (coords) {
               llat = coords.lat;
               llng = coords.lng;
               await sb.from('leads').update({ latitude: llat, longitude: llng }).eq('id', lead.id);
             }
+            await sleep(1100);
           }
         }
 
-        return {
+        leadsWithCoords.push({
           ...lead,
           _id: lead.id,
           latitude: llat,
           longitude: llng,
-        };
-      }));
+        });
+      }
 
-      return {
+      result.push({
         ...leader,
         _id: leader.id,
         latitude: lat,
         longitude: lng,
         leads: leadsWithCoords,
-      };
-    }));
+      });
+    }
 
     res.json(result);
   } catch (err: any) {
