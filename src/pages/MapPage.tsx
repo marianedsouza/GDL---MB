@@ -56,7 +56,10 @@ export default function MapPage() {
     const token = localStorage.getItem('token');
     fetch('/api/neighborhoods', { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.json())
-      .then(data => setNeighborhoods(data))
+      .then(data => {
+        if (Array.isArray(data)) setNeighborhoods(data);
+        else console.error('Resposta inválida de /api/neighborhoods:', data);
+      })
       .catch(err => console.error('Erro ao carregar bairros:', err))
       .finally(() => setLoadingNeighborhoods(false));
   }, [showNeighborhoods]);
@@ -235,7 +238,7 @@ export default function MapPage() {
                 />
                 {showNeighborhoods && neighborhoods.length > 0 && (
                   <GeoJSON
-                    key={neighborhoods.length}
+                    key="neighborhoods"
                     data={{ type: 'FeatureCollection', features: neighborhoods } as any}
                     style={() => ({
                       color: '#475569',
