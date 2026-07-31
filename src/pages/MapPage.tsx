@@ -36,9 +36,19 @@ const DEFAULT_CENTER: [number, number] = [-20.4697, -54.6201];
 
 interface NeighborhoodFeature {
   type: string;
-  properties: { name: string };
+  properties: { name?: string; regiao_urb?: string; populacao?: number };
   geometry: { type: string; coordinates: number[][][] };
 }
+
+const REGION_COLORS: Record<string, string> = {
+  CENTRO: '#e11d48',
+  SEGREDO: '#7c3aed',
+  PROSA: '#0891b2',
+  BANDEIRA: '#ea580c',
+  ANHANDUIZINHO: '#16a34a',
+  LAGOA: '#2563eb',
+  IMBIRUSSU: '#ca8a04',
+};
 
 export default function MapPage() {
   const [data, setData] = useState<LeaderMapData[]>([]);
@@ -53,14 +63,13 @@ export default function MapPage() {
   useEffect(() => {
     if (!showNeighborhoods || neighborhoods.length > 0) return;
     setLoadingNeighborhoods(true);
-    const token = localStorage.getItem('token');
-    fetch('/api/neighborhoods', { headers: { Authorization: `Bearer ${token}` } })
+    fetch('/regioes-urbanas.json')
       .then(r => r.json())
       .then(data => {
-        if (Array.isArray(data)) setNeighborhoods(data);
-        else console.error('Resposta inválida de /api/neighborhoods:', data);
+        if (data?.features) setNeighborhoods(data.features);
+        else console.error('Resposta inválida de /regioes-urbanas.json:', data);
       })
-      .catch(err => console.error('Erro ao carregar bairros:', err))
+      .catch(err => console.error('Erro ao carregar regiões urbanas:', err))
       .finally(() => setLoadingNeighborhoods(false));
   }, [showNeighborhoods]);
 
@@ -214,7 +223,7 @@ export default function MapPage() {
               onChange={(e) => setShowNeighborhoods(e.target.checked)}
               className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-600"
             />
-            Micro regiões dos bairros
+            Micro regiões (7 Regiões Urbanas)
             {loadingNeighborhoods && <span className="text-xs text-slate-400">carregando...</span>}
           </label>
         </div>
@@ -240,15 +249,22 @@ export default function MapPage() {
                   <GeoJSON
                     key="neighborhoods"
                     data={{ type: 'FeatureCollection', features: neighborhoods } as any}
-                    style={() => ({
-                      color: '#334155',
-                      weight: 2,
-                      fillColor: '#94a3b8',
-                      fillOpacity: 0.2,
-                    })}
+                    style={(feature) => {
+                      const name = (feature.properties as any)?.regiao_urb || '';
+                      const color = REGION_COLORS[name] || '#475569';
+                      return {
+                        color,
+                        weight: 2.5,
+                        fillColor: color,
+                        fillOpacity: 0.12,
+                      };
+                    }}
                     onEachFeature={(feature, layer) => {
-                      if (feature.properties?.name) {
-                        layer.bindTooltip(feature.properties.name, { permanent: true, direction: 'center', className: 'text-xs font-medium bg-white/80 border border-slate-300 rounded px-1 py-0.5' });
+                      const props = feature.properties as any;
+                      const name = props?.regiao_urb || props?.name || '';
+                      if (name) {
+                        const pop = props?.populacao ? ` · ${props.populacao.toLocaleString('pt-BR')} hab.` : '';
+                        layer.bindTooltip(name + pop, { permanent: true, direction: 'center', className: 'text-xs font-bold bg-white/85 border rounded px-1.5 py-0.5 shadow-sm' });
                       }
                     }}
                   />

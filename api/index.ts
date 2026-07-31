@@ -436,41 +436,4 @@ app.get('/api/map-data', authMiddleware, async (req, res) => {
   }
 });
 
-app.get('/api/neighborhoods', authMiddleware, async (req, res) => {
-  try {
-    const q = '[out:json][timeout:25];area["name"="Campo Grande"]["admin_level"="8"]->.city;relation(area.city)["admin_level"="10"]["type"="boundary"]["boundary"="administrative"];out geom;';
-    const overpassRes = await fetch('https://overpass-api.de/api/interpreter', {
-      method: 'POST', body: q,
-      headers: { 'User-Agent': 'GDL-MB/1.0' },
-    });
-    const data = await overpassRes.json();
-    const features = (data.elements || [])
-      .filter((el: any) => el.tags?.name && el.members?.length > 0)
-      .map((el: any) => {
-        const outers = el.members.filter((m: any) => m.role === 'outer' && m.geometry?.length > 0);
-        if (!outers.length) return null;
-        const segs = outers.map((m: any) => m.geometry.map((p: any) => [p.lon, p.lat] as [number, number]));
-        const ring: [number, number][] = [...segs[0]];
-        for (let i = 1; i < segs.length; i++) {
-          const last = ring[ring.length - 1];
-          const seg = segs[i];
-          const dFirst = Math.sqrt((last[0] - seg[0][0]) ** 2 + (last[1] - seg[0][1]) ** 2);
-          const dLast = Math.sqrt((last[0] - seg[seg.length - 1][0]) ** 2 + (last[1] - seg[seg.length - 1][1]) ** 2);
-          if (dFirst < dLast) ring.push(...seg.slice(1));
-          else ring.push(...seg.slice(0, -1).reverse());
-        }
-        return {
-          type: 'Feature',
-          properties: { name: el.tags.name },
-          geometry: { type: 'Polygon', coordinates: [ring] },
-        };
-      })
-      .filter(Boolean);
-    res.json(features);
-  } catch (err: any) {
-    console.error(err);
-    res.status(500).json({ error: 'Erro ao carregar bairros' });
-  }
-});
-
 export default app;
