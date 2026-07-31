@@ -368,11 +368,11 @@ export default function ArchetypeForm({ leaderId, leaderName }: ArchetypeFormPro
       <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 py-12 px-4 flex items-center justify-center">
         <div className="max-w-lg w-full bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden text-center">
           <div className="bg-gradient-to-r from-emerald-500 to-teal-600 px-8 py-10 text-white">
-            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Brain className="w-8 h-8" />
+            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 overflow-hidden">
+              <img src="/logo-synaptessence.png" alt="SynaptEssence" className="w-12 h-12 sm:w-14 sm:h-14 object-contain" />
             </div>
             <h1 className="text-2xl font-bold">Mapeamento Concluído!</h1>
-            <p className="text-emerald-100 mt-1">NeuroEssence360®️</p>
+            <p className="text-emerald-100 mt-1">Plataforma Estratégica</p>
           </div>
           <div className="p-8 space-y-4">
             <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto">
@@ -411,11 +411,12 @@ export default function ArchetypeForm({ leaderId, leaderName }: ArchetypeFormPro
       <div className="max-w-3xl mx-auto px-3 sm:px-4 py-4 sm:py-8">
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200">
           <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-4 sm:px-8 py-5 sm:py-8 text-center text-white">
-            <div className="w-10 h-10 sm:w-14 sm:h-14 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3">
-              <Brain className="w-5 h-5 sm:w-7 sm:h-7" />
+            <div className="w-10 h-10 sm:w-14 sm:h-14 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-2 sm:mb-3 overflow-hidden">
+              <img src="/logo-synaptessence.png" alt="SynaptEssence" className="w-8 h-8 sm:w-12 sm:h-12 object-contain" />
             </div>
-            <h1 className="text-lg sm:text-2xl font-bold">Mapeamento Arquetípico</h1>
-            <p className="text-indigo-100 text-xs sm:text-sm">NeuroEssence360®️</p>
+            <h1 className="text-lg sm:text-2xl font-bold">Plataforma Estratégica</h1>
+            <p className="text-indigo-100 text-xs sm:text-sm">Método: SynaptEssence360®</p>
+            <p className="text-indigo-200 text-[10px] sm:text-xs mt-1 sm:mt-2">Tecnologia Social de Desenvolvimento Humano Integral</p>
             <p className="text-indigo-200 text-[10px] sm:text-xs mt-1 sm:mt-2">
               {totalAnswered} de {totalQuestions} perguntas respondidas
             </p>

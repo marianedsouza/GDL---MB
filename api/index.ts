@@ -406,7 +406,8 @@ async function geocodeAddress(address: string): Promise<{ lat: number; lng: numb
 }
 
 // Tries progressively simpler address variants so a pin always appears
-// when the exact street is not found on Nominatim/OSM.
+// when the exact street is not found on Nominatim/OSM (e.g. street exists
+// as an avenue or under a different prefix).
 async function geocodeWithFallback(parts: {
   street?: string | null;
   number?: string | null;
@@ -414,15 +415,41 @@ async function geocodeWithFallback(parts: {
   city?: string | null;
   fullAddress?: string | null;
 }): Promise<{ lat: number; lng: number } | null> {
-  const s = (parts.street || '').trim();
-  const n = (parts.number || '').trim();
+  let s = (parts.street || '').trim();
+  let n = (parts.number || '').trim();
   const b = (parts.neighborhood || '').trim();
   const c = (parts.city || '').trim();
+
+  if (!s && parts.fullAddress) {
+    const seg = cleanAddress(parts.fullAddress).split(',').map(x => x.trim()).filter(Boolean);
+    if (seg.length >= 1) s = seg[0];
+    if (seg.length >= 2 && /^\d/.test(seg[1])) n = seg[1];
+  }
+
+  const variants: string[] = [];
+  if (s) variants.push(s);
+  if (s.startsWith('Rua ')) {
+    const rest = s.slice(4).trim();
+    if (rest) {
+      variants.push(rest);
+      variants.push(`Avenida ${rest}`);
+      variants.push(`Av. ${rest}`);
+    }
+  }
+  const uniqueVariants = [...new Set(variants)];
+
   const candidates: string[] = [];
   if (parts.fullAddress) candidates.push(parts.fullAddress);
-  if (s && b && c) candidates.push([s, n, b, c].filter(Boolean).join(', '));
+  for (const v of uniqueVariants) {
+    if (b && c) {
+      candidates.push([v, n, b, c].filter(Boolean).join(', '));
+      candidates.push([v, b, c].filter(Boolean).join(', '));
+    }
+    if (c) candidates.push([v, c].filter(Boolean).join(', '));
+  }
   if (b && c) candidates.push(`${b}, ${c}`);
   if (c) candidates.push(c);
+
   for (const candidate of candidates) {
     const coords = await geocodeAddress(candidate);
     if (coords) return coords;

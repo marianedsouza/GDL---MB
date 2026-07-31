@@ -88,13 +88,15 @@ export default function ArchetypeAccess() {
   return (
     <div className="min-h-[100dvh] bg-gradient-to-br from-indigo-50 to-purple-50 flex flex-col items-center justify-center p-4">
       <div className="max-w-lg w-full bg-white p-6 sm:p-8 rounded-2xl shadow-sm text-center border border-slate-200">
-        <Brain className="h-10 w-10 sm:h-12 sm:w-12 text-indigo-500 mx-auto mb-3 sm:mb-4" />
+        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white shadow-sm border border-slate-200 flex items-center justify-center mx-auto mb-3 sm:mb-4 overflow-hidden">
+          <img src="/logo-synaptessence.png" alt="SynaptEssence" className="w-16 h-16 sm:w-20 sm:h-20 object-contain" />
+        </div>
         <h2 className="text-xl sm:text-2xl font-bold text-slate-800 mb-2">Mapeamento Arquetípico</h2>
         <p className="text-sm sm:text-base text-slate-600 mb-2">
           Olá, <strong>{leaderName}</strong>!
         </p>
         <p className="text-xs sm:text-sm text-slate-500 mb-6 sm:mb-8">
-          Descubra seu perfil de liderança através do mapeamento arquetípico NeuroEssence360.
+          Descubra seu perfil de liderança através do mapeamento arquetípico da Plataforma Estratégica.
         </p>
         <button
           onClick={() => setShowForm(true)}
