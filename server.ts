@@ -98,7 +98,7 @@ app.post('/api/leaders', authMiddleware, async (req, res) => {
     if (error) throw error;
 
     if (leader.address && leader.latitude == null) {
-      const coords = await geocodeAddress(leader.address);
+      const coords = await geocodeWithFallback({ fullAddress: leader.address });
       if (coords) {
         await getSupabase().from('leaders').update({ latitude: coords.lat, longitude: coords.lng }).eq('id', leader.id);
         leader.latitude = coords.lat;
@@ -161,7 +161,13 @@ app.post('/api/public/leaders', async (req, res) => {
     if (error) throw error;
 
     if (leader.address && leader.latitude == null) {
-      const coords = await geocodeAddress(leader.address);
+      const coords = await geocodeWithFallback({
+        street: payload.street,
+        number: payload.addressNumber,
+        neighborhood: payload.neighborhood,
+        city: payload.city,
+        fullAddress: leader.address,
+      });
       if (coords) {
         await getSupabase().from('leaders').update({ latitude: coords.lat, longitude: coords.lng }).eq('id', leader.id);
         leader.latitude = coords.lat;
@@ -329,13 +335,9 @@ app.post('/api/public/leads', async (req, res) => {
     if (error) throw error;
 
     if (createdLead) {
-      const leadAddress = `${street || ''}, ${number || ''}, ${neighborhood || ''}, ${city || ''}`
-        .replace(/,\s*,/g, ',').replace(/^,\s*/, '').replace(/,\s*$/, '').trim();
-      if (leadAddress && leadAddress !== 'MS, Brasil') {
-        const coords = await geocodeAddress(leadAddress);
-        if (coords) {
-          await getSupabase().from('leads').update({ latitude: coords.lat, longitude: coords.lng }).eq('id', createdLead.id);
-        }
+      const coords = await geocodeWithFallback({ street, number, neighborhood, city });
+      if (coords) {
+        await getSupabase().from('leads').update({ latitude: coords.lat, longitude: coords.lng }).eq('id', createdLead.id);
       }
     }
 
@@ -460,6 +462,31 @@ async function geocodeAddress(address: string): Promise<{ lat: number; lng: numb
   return null;
 }
 
+// Tries progressively simpler address variants so a pin always appears
+// when the exact street is not found on Nominatim/OSM.
+async function geocodeWithFallback(parts: {
+  street?: string | null;
+  number?: string | null;
+  neighborhood?: string | null;
+  city?: string | null;
+  fullAddress?: string | null;
+}): Promise<{ lat: number; lng: number } | null> {
+  const s = (parts.street || '').trim();
+  const n = (parts.number || '').trim();
+  const b = (parts.neighborhood || '').trim();
+  const c = (parts.city || '').trim();
+  const candidates: string[] = [];
+  if (parts.fullAddress) candidates.push(parts.fullAddress);
+  if (s && b && c) candidates.push([s, n, b, c].filter(Boolean).join(', '));
+  if (b && c) candidates.push(`${b}, ${c}`);
+  if (c) candidates.push(c);
+  for (const candidate of candidates) {
+    const coords = await geocodeAddress(candidate);
+    if (coords) return coords;
+  }
+  return null;
+}
+
 // Get map data (leaders + leads with coordinates)
 app.get('/api/map-data', authMiddleware, async (req, res) => {
   try {
@@ -480,8 +507,12 @@ app.get('/api/map-data', authMiddleware, async (req, res) => {
       let lat = leader.latitude;
       let lng = leader.longitude;
 
-      if ((lat == null || lng == null) && leader.address && geocoded < GEOCODE_BATCH) {
-        const coords = await geocodeAddress(leader.address);
+      if ((lat == null || lng == null) && (leader.address || leader.neighborhood || leader.city) && geocoded < GEOCODE_BATCH) {
+        const coords = await geocodeWithFallback({
+          neighborhood: leader.neighborhood,
+          city: leader.city,
+          fullAddress: leader.address,
+        });
         geocoded++;
         if (coords) {
           lat = coords.lat;
@@ -502,18 +533,19 @@ app.get('/api/map-data', authMiddleware, async (req, res) => {
         let llng = lead.longitude;
 
         if ((llat == null || llng == null) && (lead.street || lead.neighborhood || lead.city) && geocoded < GEOCODE_BATCH) {
-          const leadAddress = `${lead.street || ''}, ${lead.address_number || ''}, ${lead.neighborhood || ''}, ${lead.city || ''}`
-            .replace(/,\s*,/g, ',').replace(/^,\s*/, '').replace(/,\s*$/, '').trim();
-          if (leadAddress && leadAddress !== 'MS, Brasil') {
-            const coords = await geocodeAddress(leadAddress);
-            geocoded++;
-            if (coords) {
-              llat = coords.lat;
-              llng = coords.lng;
-              await sb.from('leads').update({ latitude: llat, longitude: llng }).eq('id', lead.id);
-            }
-            await sleep(1100);
+          const coords = await geocodeWithFallback({
+            street: lead.street,
+            number: lead.address_number,
+            neighborhood: lead.neighborhood,
+            city: lead.city,
+          });
+          geocoded++;
+          if (coords) {
+            llat = coords.lat;
+            llng = coords.lng;
+            await sb.from('leads').update({ latitude: llat, longitude: llng }).eq('id', lead.id);
           }
+          await sleep(1100);
         }
 
         leadsWithCoords.push({

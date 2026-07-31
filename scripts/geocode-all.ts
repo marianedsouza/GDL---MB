@@ -30,55 +30,88 @@ async function geocodeAddress(address: string): Promise<{ lat: number; lng: numb
   return null;
 }
 
+async function geocodeWithFallback(parts: {
+  street?: string | null;
+  number?: string | null;
+  neighborhood?: string | null;
+  city?: string | null;
+  fullAddress?: string | null;
+}): Promise<{ lat: number; lng: number } | null> {
+  const s = (parts.street || '').trim();
+  const n = (parts.number || '').trim();
+  const b = (parts.neighborhood || '').trim();
+  const c = (parts.city || '').trim();
+  const candidates: string[] = [];
+  if (parts.fullAddress) candidates.push(parts.fullAddress);
+  if (s && b && c) candidates.push([s, n, b, c].filter(Boolean).join(', '));
+  if (b && c) candidates.push(`${b}, ${c}`);
+  if (c) candidates.push(c);
+  for (const candidate of candidates) {
+    const coords = await geocodeAddress(candidate);
+    if (coords) return coords;
+  }
+  return null;
+}
+
 async function main() {
   console.log('Buscando lideranças sem coordenadas...');
   const { data: leaders } = await supabase
     .from('leaders')
-    .select('id, address, latitude, longitude');
+    .select('id, name, address, neighborhood, city, latitude, longitude');
 
   if (!leaders) { console.log('Nenhuma liderança encontrada.'); return; }
 
+  let leadersFixed = 0;
   for (const leader of leaders) {
     if (leader.latitude && leader.longitude) continue;
-    if (!leader.address) continue;
+    if (!leader.address && !leader.neighborhood && !leader.city) continue;
 
-    const address = `${leader.address}, Brasil`;
-    console.log(`Geocodificando liderança: ${address}`);
-    const coords = await geocodeAddress(address);
+    console.log(`Geocodificando liderança: ${leader.name || leader.id}`);
+    const coords = await geocodeWithFallback({
+      neighborhood: leader.neighborhood,
+      city: leader.city,
+      fullAddress: leader.address,
+    });
     if (coords) {
       await supabase.from('leaders').update({ latitude: coords.lat, longitude: coords.lng }).eq('id', leader.id);
+      leadersFixed++;
       console.log(`  -> ${coords.lat}, ${coords.lng}`);
     } else {
       console.log(`  -> Sem resultados`);
     }
     await new Promise(r => setTimeout(r, 1100));
   }
+  console.log(`Lideranças atualizadas: ${leadersFixed}`);
 
   console.log('\nBuscando contatos sem coordenadas...');
   const { data: leads } = await supabase
     .from('leads')
-    .select('id, street, address_number, neighborhood, city, latitude, longitude');
+    .select('id, name, street, address_number, neighborhood, city, latitude, longitude');
 
   if (!leads) { console.log('Nenhum contato encontrado.'); return; }
 
+  let leadsFixed = 0;
   for (const lead of leads) {
     if (lead.latitude && lead.longitude) continue;
     if (!lead.street && !lead.neighborhood && !lead.city) continue;
 
-    const address = `${lead.street || ''}, ${lead.address_number || ''}, ${lead.neighborhood || ''}, ${lead.city || ''}, MS, Brasil`
-      .replace(/,\s*,/g, ',').replace(/^,\s*/, '').replace(/,\s*$/, '').trim();
-    if (!address || address === ', , , MS, Brasil' || address === 'MS, Brasil') continue;
-
-    console.log(`Geocodificando contato: ${address}`);
-    const coords = await geocodeAddress(address);
+    console.log(`Geocodificando contato: ${lead.name || lead.id}`);
+    const coords = await geocodeWithFallback({
+      street: lead.street,
+      number: lead.address_number,
+      neighborhood: lead.neighborhood,
+      city: lead.city,
+    });
     if (coords) {
       await supabase.from('leads').update({ latitude: coords.lat, longitude: coords.lng }).eq('id', lead.id);
+      leadsFixed++;
       console.log(`  -> ${coords.lat}, ${coords.lng}`);
     } else {
       console.log(`  -> Sem resultados`);
     }
     await new Promise(r => setTimeout(r, 1100));
   }
+  console.log(`Contatos atualizados: ${leadsFixed}`);
 
   console.log('\nConcluído!');
 }
