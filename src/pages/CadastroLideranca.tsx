@@ -608,7 +608,7 @@ export default function CadastroLideranca() {
                 </p>
                 <label className="flex items-center gap-3 cursor-pointer">
                   <input required type="checkbox" name="commitmentAgreed" onChange={handleChange} checked={formData.commitmentAgreed} className="w-5 h-5 text-indigo-600 rounded border-slate-300 focus:ring-indigo-600" />
-                  <span className="font-semibold text-slate-800">Concordo.</span>
+                  <span className="font-semibold text-slate-800">Concordo. <span className="text-red-500 text-xs font-bold">obrigatório</span></span>
                 </label>
               </div>
               <div className="border-t border-slate-200 pt-5">
@@ -617,7 +617,7 @@ export default function CadastroLideranca() {
                 </p>
                 <label className="flex items-center gap-3 cursor-pointer">
                   <input required type="checkbox" name="lgpdAgreed" onChange={handleChange} checked={formData.lgpdAgreed} className="w-5 h-5 text-indigo-600 rounded border-slate-300 focus:ring-indigo-600" />
-                  <span className="font-semibold text-slate-800">Concordo com o termo LGPD.</span>
+                  <span className="font-semibold text-slate-800">Concordo com o termo LGPD. <span className="text-red-500 text-xs font-bold">obrigatório</span></span>
                 </label>
               </div>
             </div>
