@@ -272,7 +272,6 @@ export default function PublicForm() {
         <div className="bg-indigo-600 px-8 py-10 text-center text-white">
           <h1 className="text-3xl font-bold mb-1">Cadastro de Contatos</h1>
           <p className="text-indigo-100 text-lg font-medium">Equipe MB</p>
-          <p className="text-indigo-200 text-sm mt-2">Campanha Marquinhos Trad 2026</p>
         </div>
 
         <div className="px-6 sm:px-8 py-6 bg-indigo-50 border-b border-indigo-100 text-sm text-slate-700">
