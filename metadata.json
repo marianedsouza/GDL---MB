@@ -1,0 +1,8 @@
+{
+  "name": "Liderança CRUD",
+  "description": "Sistema de cadastro de liderança com QR Code e formulário de captação de pessoas vinculadas a cada líder.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
