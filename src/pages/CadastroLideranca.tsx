@@ -52,8 +52,16 @@ export default function CadastroLideranca() {
   const [cepError, setCepError] = useState('');
   const [loadingCep, setLoadingCep] = useState(false);
   const [copiedUrl, setCopiedUrl] = useState(false);
+  const [formActive, setFormActive] = useState(true);
 
-  
+  useEffect(() => {
+    fetch('/api/public/form-status')
+      .then(r => r.json())
+      .then(data => setFormActive(data.active ?? true))
+      .catch(() => {});
+  }, []);
+
+
   const handleCepChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value.replace(/\D/g, '');
     setFormData(prev => ({ ...prev, cep: val }));
@@ -161,6 +169,20 @@ export default function CadastroLideranca() {
       setSubmitting(false);
     }
   };
+
+  if (!formActive) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
+        <div className="bg-white p-8 rounded-2xl shadow-sm text-center max-w-sm w-full border border-slate-200">
+          <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <AlertCircle className="w-8 h-8 text-amber-500" />
+          </div>
+          <h1 className="text-2xl font-bold text-slate-800 mb-2">Link Pausado</h1>
+          <p className="text-slate-600">Este link está temporariamente indisponível. Entre em contato com os administradores.</p>
+        </div>
+      </div>
+    );
+  }
 
   if (success) {
     return (
