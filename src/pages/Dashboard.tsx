@@ -29,6 +29,7 @@ export default function Dashboard() {
   const [loadingCep, setLoadingCep] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [formActive, setFormActive] = useState(true);
+  const [liderancaActive, setLiderancaActive] = useState(true);
   const [togglingForm, setTogglingForm] = useState(false);
 
   const fetchLeaders = async () => {
@@ -62,22 +63,30 @@ export default function Dashboard() {
       .then(r => r.json())
       .then(data => setFormActive(data.active ?? true))
       .catch(() => {});
+    fetch('/api/public/lideranca-form-status')
+      .then(r => r.json())
+      .then(data => setLiderancaActive(data.active ?? true))
+      .catch(() => {});
   }, []);
 
-  const toggleFormStatus = async () => {
+  const toggleFormStatus = async (type: 'contato' | 'lideranca') => {
     setTogglingForm(true);
     try {
       const token = localStorage.getItem('token');
+      const body = type === 'contato'
+        ? { active: !formActive }
+        : { lideranca_active: !liderancaActive };
       const res = await fetch('/api/admin/form-status', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify({ active: !formActive })
+        body: JSON.stringify(body)
       });
       if (res.ok) {
-        setFormActive(!formActive);
+        if (type === 'contato') setFormActive(!formActive);
+        else setLiderancaActive(!liderancaActive);
       }
     } catch (err) {
       console.error(err);
@@ -301,7 +310,7 @@ export default function Dashboard() {
         </div>
         <div className="flex gap-3">
           <button
-            onClick={toggleFormStatus}
+            onClick={() => toggleFormStatus('contato')}
             disabled={togglingForm}
             className={`flex items-center justify-center px-4 py-2 border rounded-lg transition-colors font-medium ${
               formActive
@@ -310,7 +319,19 @@ export default function Dashboard() {
             } disabled:opacity-50`}
           >
             {formActive ? <Power className="w-5 h-5 mr-2" /> : <PowerOff className="w-5 h-5 mr-2" />}
-            {formActive ? 'Formulário ON' : 'Formulário OFF'}
+            Contato {formActive ? 'ON' : 'OFF'}
+          </button>
+          <button
+            onClick={() => toggleFormStatus('lideranca')}
+            disabled={togglingForm}
+            className={`flex items-center justify-center px-4 py-2 border rounded-lg transition-colors font-medium ${
+              liderancaActive
+                ? 'bg-green-50 border-green-300 text-green-700 hover:bg-green-100'
+                : 'bg-red-50 border-red-300 text-red-700 hover:bg-red-100'
+            } disabled:opacity-50`}
+          >
+            {liderancaActive ? <Power className="w-5 h-5 mr-2" /> : <PowerOff className="w-5 h-5 mr-2" />}
+            Liderança {liderancaActive ? 'ON' : 'OFF'}
           </button>
           <Link
             to="/cadastro"

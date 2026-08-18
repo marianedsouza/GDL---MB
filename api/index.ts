@@ -493,7 +493,7 @@ app.get('/api/map-data', authMiddleware, async (req, res) => {
   }
 });
 
-// Public: check form status (ON/OFF)
+// Public: check contact form status (ON/OFF)
 app.get('/api/public/form-status', async (_req, res) => {
   try {
     const { data, error } = await getSupabase()
@@ -508,13 +508,31 @@ app.get('/api/public/form-status', async (_req, res) => {
   }
 });
 
-// Admin: toggle form status
+// Public: check lideranca form status (ON/OFF)
+app.get('/api/public/lideranca-form-status', async (_req, res) => {
+  try {
+    const { data, error } = await getSupabase()
+      .from('form_settings')
+      .select('lideranca_form_active')
+      .eq('id', 1)
+      .single();
+    if (error) throw error;
+    res.json({ active: data?.lideranca_form_active ?? true });
+  } catch {
+    res.json({ active: true });
+  }
+});
+
+// Admin: toggle both form statuses
 app.put('/api/admin/form-status', authMiddleware, async (req, res) => {
   try {
-    const { active } = req.body;
+    const { active, lideranca_active } = req.body;
+    const update: Record<string, any> = { updated_at: new Date().toISOString() };
+    if (typeof active === 'boolean') update.form_active = active;
+    if (typeof lideranca_active === 'boolean') update.lideranca_form_active = lideranca_active;
     const { error } = await getSupabase()
       .from('form_settings')
-      .update({ form_active: active, updated_at: new Date().toISOString() })
+      .update(update)
       .eq('id', 1);
     if (error) throw error;
     res.json({ success: true });

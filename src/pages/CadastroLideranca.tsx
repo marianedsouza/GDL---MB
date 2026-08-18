@@ -55,7 +55,7 @@ export default function CadastroLideranca() {
   const [formActive, setFormActive] = useState(true);
 
   useEffect(() => {
-    fetch('/api/public/form-status')
+    fetch('/api/public/lideranca-form-status')
       .then(r => r.json())
       .then(data => setFormActive(data.active ?? true))
       .catch(() => {});
