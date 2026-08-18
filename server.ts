@@ -544,6 +544,36 @@ app.get('/api/map-data', authMiddleware, async (req, res) => {
   }
 });
 
+// Public: check form status (ON/OFF)
+app.get('/api/public/form-status', async (_req, res) => {
+  try {
+    const { data, error } = await getSupabase()
+      .from('form_settings')
+      .select('form_active')
+      .eq('id', 1)
+      .single();
+    if (error) throw error;
+    res.json({ active: data?.form_active ?? true });
+  } catch {
+    res.json({ active: true });
+  }
+});
+
+// Admin: toggle form status
+app.put('/api/admin/form-status', authMiddleware, async (req, res) => {
+  try {
+    const { active } = req.body;
+    const { error } = await getSupabase()
+      .from('form_settings')
+      .update({ form_active: active, updated_at: new Date().toISOString() })
+      .eq('id', 1);
+    if (error) throw error;
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(500).json({ error: 'Erro ao atualizar status', details: err.message });
+  }
+});
+
 // --- VITE MIDDLEWARE & SERVER ---
 async function startServer() {
   if (process.env.NODE_ENV !== "production") {

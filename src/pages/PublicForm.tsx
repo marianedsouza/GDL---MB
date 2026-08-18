@@ -15,6 +15,7 @@ export default function PublicForm() {
   const { leaderId } = useParams();
   const [leaderName, setLeaderName] = useState('');
   const [loading, setLoading] = useState(true);
+  const [formActive, setFormActive] = useState(true);
 
   const [name, setName] = useState('');
   const [preferredName, setPreferredName] = useState('');
@@ -69,6 +70,13 @@ export default function PublicForm() {
     };
     if (leaderId) fetchLeader();
   }, [leaderId]);
+
+  useEffect(() => {
+    fetch('/api/public/form-status')
+      .then(r => r.json())
+      .then(data => setFormActive(data.active ?? true))
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     const digits = cpf.replace(/\D/g, '');
@@ -234,6 +242,20 @@ export default function PublicForm() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="animate-pulse text-slate-500">Carregando...</div>
+      </div>
+    );
+  }
+
+  if (!formActive) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
+        <div className="bg-white p-8 rounded-2xl shadow-sm text-center max-w-sm w-full border border-slate-200">
+          <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <AlertCircle className="w-8 h-8 text-amber-500" />
+          </div>
+          <h1 className="text-2xl font-bold text-slate-800 mb-2">Formulário Pausado</h1>
+          <p className="text-slate-600">Este formulário está temporariamente indisponível. Tente novamente mais tarde.</p>
+        </div>
       </div>
     );
   }

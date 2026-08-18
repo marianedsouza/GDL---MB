@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { Plus, Trash2, Link as LinkIcon, Users, ExternalLink, Download, Share2, Copy, Check, AlertCircle } from 'lucide-react';
+import { Plus, Trash2, Link as LinkIcon, Users, ExternalLink, Download, Share2, Copy, Check, AlertCircle, Power, PowerOff } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import AdminLayout from '../components/AdminLayout';
 
@@ -28,6 +28,8 @@ export default function Dashboard() {
   const [newCepError, setNewCepError] = useState('');
   const [loadingCep, setLoadingCep] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [formActive, setFormActive] = useState(true);
+  const [togglingForm, setTogglingForm] = useState(false);
 
   const fetchLeaders = async () => {
     try {
@@ -56,7 +58,33 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchLeaders();
+    fetch('/api/public/form-status')
+      .then(r => r.json())
+      .then(data => setFormActive(data.active ?? true))
+      .catch(() => {});
   }, []);
+
+  const toggleFormStatus = async () => {
+    setTogglingForm(true);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch('/api/admin/form-status', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ active: !formActive })
+      });
+      if (res.ok) {
+        setFormActive(!formActive);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setTogglingForm(false);
+    }
+  };
 
   const handleCepChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value.replace(/\D/g, '');
@@ -272,6 +300,18 @@ export default function Dashboard() {
           <p className="text-slate-500">Gerencie seus líderes e seus respectivos QR Codes.</p>
         </div>
         <div className="flex gap-3">
+          <button
+            onClick={toggleFormStatus}
+            disabled={togglingForm}
+            className={`flex items-center justify-center px-4 py-2 border rounded-lg transition-colors font-medium ${
+              formActive
+                ? 'bg-green-50 border-green-300 text-green-700 hover:bg-green-100'
+                : 'bg-red-50 border-red-300 text-red-700 hover:bg-red-100'
+            } disabled:opacity-50`}
+          >
+            {formActive ? <Power className="w-5 h-5 mr-2" /> : <PowerOff className="w-5 h-5 mr-2" />}
+            {formActive ? 'Formulário ON' : 'Formulário OFF'}
+          </button>
           <Link
             to="/cadastro"
             target="_blank"
