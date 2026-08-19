@@ -239,6 +239,21 @@ export default function MapPage() {
     return lns;
   }, [data, showAllContacts, selectedLeader, leaderColorMap, coResidentLeaderIds]);
 
+  const regionStats = useMemo(() => {
+    if (!showNeighborhoods || neighborhoods.length === 0) return [];
+    const map = new Map<string, { name: string; population: number; count: number }>();
+    neighborhoods.forEach(f => {
+      const region = f.properties?.regiao_urb || '';
+      if (!region) return;
+      const pop = f.properties?.populacao || 0;
+      const existing = map.get(region) || { name: region, population: 0, count: 0 };
+      existing.population += pop;
+      existing.count += 1;
+      map.set(region, existing);
+    });
+    return [...map.values()].sort((a, b) => b.population - a.population);
+  }, [showNeighborhoods, neighborhoods]);
+
   const stats = useMemo(() => {
     const totalLeaders = data.length;
     const totalLeads = data.reduce((s, l) => s + l.leads.length, 0);
@@ -533,36 +548,56 @@ export default function MapPage() {
             </div>
 
             <div className="border-t lg:border-t-0 lg:border-l border-slate-200 p-4 max-h-[300px] lg:max-h-[700px] overflow-y-auto">
-              <h3 className="text-sm font-bold text-slate-700 mb-3">Legenda</h3>
+              <h3 className="text-sm font-bold text-slate-700 mb-3">
+                {showNeighborhoods ? 'Micro Regiões' : 'Legenda'}
+              </h3>
               <div className="space-y-2">
-                {data.length === 0 && (
+                {showNeighborhoods && regionStats.length > 0 ? (
+                  regionStats.map((r) => {
+                    const color = REGION_COLORS[r.name] || '#475569';
+                    return (
+                      <div key={r.name} className="flex items-center gap-2 p-2 rounded-lg text-xs">
+                        <span
+                          className="w-3 h-3 rounded-full shrink-0"
+                          style={{ backgroundColor: color }}
+                        />
+                        <span className="flex-1 truncate font-medium text-slate-700">
+                          {r.name}
+                        </span>
+                        <span className="text-slate-500 shrink-0 text-right">
+                          {r.population.toLocaleString('pt-BR')} hab.
+                        </span>
+                      </div>
+                    );
+                  })
+                ) : data.length === 0 ? (
                   <p className="text-xs text-slate-400">Nenhum dado disponível</p>
+                ) : (
+                  data.map((leader) => {
+                    const color = leaderColorMap.get(leader._id);
+                    return (
+                      <button
+                        key={leader._id}
+                        onClick={() => {
+                          setSelectedLeader(selectedLeader === leader._id ? null : leader._id);
+                          if (selectedLeader === leader._id) setShowAllContacts(false);
+                        }}
+                        className={`w-full text-left flex items-center gap-2 p-2 rounded-lg transition-colors text-xs ${
+                          selectedLeader === leader._id ? 'bg-slate-100' : 'hover:bg-slate-50'
+                        }`}
+                      >
+                        <span
+                          className="w-3 h-3 rounded-full shrink-0"
+                          style={{ backgroundColor: color }}
+                        />
+                        <span className="flex-1 truncate font-medium text-slate-700">
+                          {leader.name}
+                        </span>
+                        <span className="text-slate-400 shrink-0">{leader.leads.length}</span>
+                      </button>
+                    );
+                  })
                 )}
-                {data.map((leader) => {
-                  const color = leaderColorMap.get(leader._id);
-                  const hasCoords = leader.latitude != null;
-                  return (
-                    <button
-                      key={leader._id}
-                      onClick={() => {
-                        setSelectedLeader(selectedLeader === leader._id ? null : leader._id);
-                        if (selectedLeader === leader._id) setShowAllContacts(false);
-                      }}
-                      className={`w-full text-left flex items-center gap-2 p-2 rounded-lg transition-colors text-xs ${
-                        selectedLeader === leader._id ? 'bg-slate-100' : 'hover:bg-slate-50'
-                      }`}
-                    >
-                      <span
-                        className="w-3 h-3 rounded-full shrink-0"
-                        style={{ backgroundColor: color }}
-                      />
-                      <span className="flex-1 truncate font-medium text-slate-700">
-                        {leader.name}
-                      </span>
-                      <span className="text-slate-400 shrink-0">{leader.leads.length}</span>
-                    </button>
-                  );
-                })}
               </div>
             </div>
           </div>
