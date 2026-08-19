@@ -40,7 +40,8 @@ interface LeaderMapData {
 const LEADER_COLORS = [
   '#ff796a', '#3498db', '#07aa30', '#f39c12', '#d468ff',
   '#85d604', '#ff8c27', '#d314b3', '#16a085', '#ff1900',
-  '#0c00af', '#136e39', '#cc5200', '#792a9b', '#2c3e50', '#ffde22', '#8a0202',
+  '#0c00af', '#136e39', '#cc5200', '#792a9b', '#2c3e50',
+  '#ffde22', '#8a0202',
 ];
 
 const DEFAULT_CENTER: [number, number] = [-20.4697, -54.6201];
@@ -67,13 +68,13 @@ interface NeighborhoodFeature {
 }
 
 const REGION_COLORS: Record<string, string> = {
-  CENTRO: '#e11d48',
-  SEGREDO: '#9354ff',
+  CENTRO: '#ff0037',
+  SEGREDO: '#a571ff',
   PROSA: '#b208a9',
-  BANDEIRA: '#ea580c',
+  BANDEIRA: '#fd7f3c',
   ANHANDUIZINHO: '#16a34a',
   LAGOA: '#2563eb',
-  IMBIRUSSU: '#f8aa00',
+  IMBIRUSSU: '#ffc23e',
 };
 
 export default function MapPage() {
