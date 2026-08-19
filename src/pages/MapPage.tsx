@@ -39,7 +39,7 @@ interface LeaderMapData {
 
 const LEADER_COLORS = [
   '#ff796a', '#3498db', '#07aa30', '#f39c12', '#d468ff',
-  '#9dff00', '#ff8c27', '#d314b3', '#16a085', '#ff1900',
+  '#85d604', '#ff8c27', '#d314b3', '#16a085', '#ff1900',
   '#0c00af', '#136e39', '#cc5200', '#792a9b', '#2c3e50', '#ffde22', '#8a0202',
 ];
 
